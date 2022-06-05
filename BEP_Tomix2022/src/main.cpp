@@ -32,6 +32,16 @@ void saveGPSData(gpsData &data);
 void triger();
 void initSD();
 
+// 1PPS interruptでtrigerされる関数
+void triger() {
+    GPSData = {tinyGPS.location.lat(), tinyGPS.location.lng()};
+    saveGPSData(GPSData);
+
+    Serial.print(GPSData.latitude, 6);
+    Serial.print(", ");
+    Serial.println(GPSData.latitude, 6);
+}
+
 void saveGPSData(gpsData &data) {
     File dataFile = SD.open("datalog.txt", FILE_WRITE);
     if (dataFile) {
@@ -41,15 +51,6 @@ void saveGPSData(gpsData &data) {
         Serial.println(F("error opening datalog.txt"));
     }
     dataFile.close();
-}
-
-void triger() {
-    GPSData = {tinyGPS.location.lat(), tinyGPS.location.lng()};
-    saveGPSData(GPSData);
-
-    Serial.print(GPSData.latitude, 6);
-    Serial.print(", ");
-    Serial.println(GPSData.latitude, 6);
 }
 
 void initSD() {
