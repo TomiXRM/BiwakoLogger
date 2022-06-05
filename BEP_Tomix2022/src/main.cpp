@@ -20,9 +20,9 @@ D13 - as SCK
 SoftwareSerial gps(5, 6); // RX, TX
 TinyGPSPlus tinyGPS;
 
-typedef struct {
-    double latitude;
-    double longitude;
+volatile typedef struct {
+    volatile double latitude;
+    volatile double longitude;
 } gpsData;
 
 gpsData GPSData;
@@ -34,6 +34,7 @@ void initSD();
 
 // 1PPS interruptでtrigerされる関数
 void triger() {
+    interrupts();
     GPSData = {tinyGPS.location.lat(), tinyGPS.location.lng()};
     saveGPSData(GPSData);
 
