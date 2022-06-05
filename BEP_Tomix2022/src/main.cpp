@@ -1,20 +1,26 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
+#include <TinyGPS++.h>
 
 #define interruptPin 2
-SoftwareSerial mySerial(10, 11); // RX, TX
+
+SoftwareSerial gps(10, 11); // RX, TX
+TinyGPSPlus tinyGPS;
 
 void triger() {
-    Serial.print("triger\n");
+    Serial.print(tinyGPS.location.lat(), 6);
+    Serial.print(", ");
+    Serial.println(tinyGPS.location.lng(), 6);
 }
 
 void setup() {
     pinMode(interruptPin, INPUT_PULLUP);
     Serial.begin(115200);
-    mySerial.begin(9600);
+    gps.begin(9600);
     attachInterrupt(digitalPinToInterrupt(interruptPin), triger, FALLING);
 }
 
 void loop() {
-    if (mySerial.available()) Serial.write(mySerial.read());
+    while (gps.available())
+        tinyGPS.encode(gps.read());
 }
