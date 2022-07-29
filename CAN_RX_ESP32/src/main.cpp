@@ -2,8 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #include "Arduino.h"
 #include <CAN.h>
+#include <Ticker.h>
+const int LED_PIN = 2;
 
+Ticker tick;
 void setup() {
+    pinMode(LED_PIN, OUTPUT);
+    tick.attach_ms(1000, []() {
+        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+    });
     Serial.begin(2000000);
     while (!Serial)
         ;
@@ -11,6 +18,7 @@ void setup() {
     Serial.println("CAN Receiver");
 
     // start the CAN bus at 500 kbps
+    CAN.setPins(26, 25);
     if (!CAN.begin(500E3)) {
         Serial.println("Starting CAN failed!");
         while (1)
