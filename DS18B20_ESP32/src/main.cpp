@@ -1,7 +1,10 @@
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <Ticker.h>
+const int LED_PIN = 2;
 
+Ticker tick;
 // Data wire is plugged into port 2 on the Arduino
 #define ONE_WIRE_BUS 33
 
@@ -12,6 +15,10 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
 void setup(void) {
+    pinMode(LED_PIN, OUTPUT);
+    tick.attach_ms(1000, []() {
+        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+    });
     // start serial port
     Serial.begin(2000000);
     pinMode(ONE_WIRE_BUS, INPUT_PULLUP);
