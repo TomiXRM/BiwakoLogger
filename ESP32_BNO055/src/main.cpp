@@ -196,6 +196,7 @@ void get_biase_acceler(void) {
     //バイアスの表示
     Serial.printf("　Bias_xyz:%f,%f,%f,%f\r\n", accelerBias.x, accelerBias.y, accelerBias.z);
     delay(2000);
+    
 }
 
 void loop(void) {
