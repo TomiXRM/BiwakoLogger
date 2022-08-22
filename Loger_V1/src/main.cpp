@@ -1,47 +1,55 @@
-// Copyright (c) Sandeep Mistry. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-#include <CAN.h>
-#include <Ticker.h>
+// read waterTemperature with multitasking and display it on the screen
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <Ticker.h>
+#include <CAN.h>
 
-const int LED_PIN = 2;
-const int ONE_WIRE_BUS = 33;
-const int AIN_PIN = 27;
+// pin definitions
+#define LED_PIN 2
+#define ONE_WIRE_BUS 33
 
+// create instance
 Ticker tick;
 OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature temperatureSens(&oneWire);
+DallasTemperature waterTemp(&oneWire);
 
-struct {
-    int temp;
-    int pressure;
-} sensors
+// multiTask
+TaskHandle_t thp[2];
+QueueHandle_t xQueue_1;
 
-    void
-    onReceive(int packetSize); // CAN受信時に呼び出される関数(プロトタイプ宣言)
+// global variables
+volatile struct {
+    float temp;
+    float pressur;
+    uint32_t time;
+} data;
+
+// prototypes
+void Core0a(void *args);
+void Core1a(void *args);
 
 void setup() {
-    pinMode(LED_PIN, OUTPUT);
-    tick.attach_ms(1000, []() {
-        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
-    });
-    Serial.begin(2000000);
-    temperatureSens.begin();
-    Serial.println("CAN Loger");
+    Serial.begin(115200);
 
-    // start the CAN bus at 500 kbps
     CAN.setPins(25, 26);
     if (!CAN.begin(500E3)) {
         Serial.println("Starting CAN failed!");
         while (1)
             ;
     }
-    // CAN.onReceive(onReceive);
+
+    // alive LED initialization
+    tick.attach_ms(10, []() {
+        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+    });
+
+    // create tasks
+    xQueue_1 = xQueueCreate(10, 16);
+    xTaskCreatePinnedToCore(Core0a, "Core0a", 4096, NULL, 2, &thp[0], 0);
+    xTaskCreatePinnedToCore(Core1a, "Core1a", 4096, NULL, 1, &thp[1], 1);
 }
 
-// CAN受信時に呼び出される関数
 void onReceive(int packetSize) {
     Serial.print("Received ");
 
@@ -90,13 +98,30 @@ void onReceive(int packetSize) {
     Serial.println();
 }
 
+// task1 (Core1) : read temperature and pressure
+void Core1a(void *args) {
+    float tmp;
+    while (1) {
+        waterTemp.requestTemperatures();
+        tmp = waterTemp.getTempCByIndex(0);
+        xQueueSend(xQueue_1, &tmp, 0);
+    }
+}
+
+// task2 (Core0) : put water temperature to global variable
+void Core0a(void *args) {
+    float tmp = 0;
+    while (1) {
+        // wait for queue to be filled
+        xQueueReceive(xQueue_1, &tmp, portMAX_DELAY);
+        data.temp = tmp; // put to global variable
+    }
+}
+
 void loop() {
     int packetSize = CAN.parsePacket(); //パケットサイズの確認
-    sensors.requestTemperatures();
-
-    if (packetSize) {          // CANバスからデータを受信したら
-        onReceive(packetSize); //受信時に呼び出される関数を呼び出す
+    if (packetSize) {                   // CANバスからデータを受信したら
+        onReceive(packetSize);          //受信時に呼び出される関数を呼び出す
     }
-    Serial.print("Temperature: ");
-    Serial.println();
+    Serial.println(data.temp);
 }
