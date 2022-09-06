@@ -1,6 +1,6 @@
 #include <WiFi.h>
-#include <ESPmDNS.h>
-#include <WiFiUdp.h>
+// #include <ESPmDNS.h>
+// #include <WiFiUdp.h>
 #include <BluetoothSerial.h>
 // #include <ArduinoOTA.h>
 #include "FS.h"
@@ -25,7 +25,11 @@ void setup() {
     // WiFi.mode(WIFI_STA);
     // WiFi.begin(ssid, password);
     // uint8_t wifiTryCount = 0;
-    if (!SD.begin()) {
+    int8_t c = 0;
+    while (!SD.begin(4) && c < 10) {
+        c++;
+        delay(1000);
+        Serial.println("SD Card Mount Failed");
         //初期化失敗の処理
     }
 

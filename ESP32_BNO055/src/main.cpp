@@ -31,18 +31,19 @@ void calVelocity();
 
 void setup(void) {
     // LEDを光らせるタイマーを設定
+    Serial.begin(115200);
+    Serial.println("setup");
     pinMode(LED_PIN, OUTPUT);
     tick.attach_ms(650, []() {
         digitalWrite(LED_PIN, !digitalRead(LED_PIN));
     });
 
-    Serial.begin(2000000);
-
     // センサの初期化
     if (!bno.begin()) {
-        Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-        while (1)
-            ;
+        while (1) {
+            Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+            delay(1000);
+        }
     }
     deltaT.reset();
     delay(1000);
@@ -125,7 +126,6 @@ void get_biase_acceler(void) {
     //バイアスの表示
     Serial.printf("　Bias_xyz:%f,%f,%f,%f\r\n", accelerBias.x, accelerBias.y, accelerBias.z);
     delay(2000);
-    
 }
 
 void loop(void) {
