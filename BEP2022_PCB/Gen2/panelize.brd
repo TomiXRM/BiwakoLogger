@@ -3,10 +3,10 @@
 <eagle version="9.6.2">
 <drawing>
 <settings>
-<setting alwaysvectorfont="yes"/>
+<setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="1.27" unitdist="mm" unit="mm" style="lines" multiple="1" display="no" altdistance="5" altunitdist="mil" altunit="mm"/>
+<grid distance="0.3175" unitdist="mm" unit="mm" style="lines" multiple="1" display="no" altdistance="5" altunitdist="mil" altunit="mm"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="16" fill="1" visible="no" active="no"/>
@@ -414,14 +414,14 @@
 <text x="60.09" y="84.65" size="1" layer="21">+</text>
 <text x="60.11" y="77.13" size="1" layer="21">-</text>
 <text x="6.25" y="84.72" size="1" layer="21">-</text>
-<wire x1="17" y1="66.04" x2="50.2613" y2="66.04" width="0.01" layer="20"/>
-<wire x1="50.2613" y1="66.04" x2="50.2613" y2="63.5" width="0.01" layer="20"/>
-<wire x1="50.2613" y1="63.5" x2="17" y2="63.5" width="0.01" layer="20"/>
-<wire x1="17" y1="63.5" x2="17" y2="66.04" width="0.01" layer="20"/>
-<wire x1="17" y1="33.02" x2="50.2613" y2="33.02" width="0.01" layer="20"/>
-<wire x1="50.2613" y1="33.02" x2="50.2613" y2="30.48" width="0.01" layer="20"/>
-<wire x1="50.2613" y1="30.48" x2="17" y2="30.48" width="0.01" layer="20"/>
-<wire x1="17" y1="30.48" x2="17" y2="33.02" width="0.01" layer="20"/>
+<wire x1="17.9525" y1="66.04" x2="49.3088" y2="66.04" width="0.01" layer="20"/>
+<wire x1="49.3088" y1="66.04" x2="49.3088" y2="63.5" width="0.01" layer="20"/>
+<wire x1="49.3088" y1="63.5" x2="17.9525" y2="63.5" width="0.01" layer="20"/>
+<wire x1="17.9525" y1="63.5" x2="17.9525" y2="66.04" width="0.01" layer="20"/>
+<wire x1="17.9525" y1="33.02" x2="49.3088" y2="33.02" width="0.01" layer="20"/>
+<wire x1="49.3088" y1="33.02" x2="49.3088" y2="30.48" width="0.01" layer="20"/>
+<wire x1="49.3088" y1="30.48" x2="17.9525" y2="30.48" width="0.01" layer="20"/>
+<wire x1="17.9525" y1="30.48" x2="17.9525" y2="33.02" width="0.01" layer="20"/>
 <circle x="4.6213" y="91.8987" radius="1.5" width="0.01" layer="20"/>
 <circle x="4.6213" y="70.6613" radius="1.5" width="0.01" layer="20"/>
 <circle x="4.6213" y="58.8787" radius="1.5" width="0.01" layer="20"/>
@@ -436,15 +436,15 @@
 <circle x="62.64" y="70.6613" radius="1.5" width="0.01" layer="20"/>
 <wire x1="0" y1="91.52" x2="0" y2="71.04" width="0.01" layer="20"/>
 <wire x1="0" y1="71.04" x2="5" y2="66.04" width="0.01" layer="20"/>
-<wire x1="5" y1="66.04" x2="15" y2="66.04" width="0.01" layer="20"/>
-<wire x1="15" y1="66.04" x2="15" y2="63.5" width="0.01" layer="20"/>
-<wire x1="15" y1="63.5" x2="5" y2="63.5" width="0.01" layer="20"/>
+<wire x1="5" y1="66.04" x2="13.73" y2="66.04" width="0.01" layer="20"/>
+<wire x1="13.73" y1="66.04" x2="13.73" y2="63.5" width="0.01" layer="20"/>
+<wire x1="13.73" y1="63.5" x2="5" y2="63.5" width="0.01" layer="20"/>
 <wire x1="5" y1="63.5" x2="0" y2="58.5" width="0.01" layer="20"/>
 <wire x1="0" y1="58.5" x2="0" y2="38.02" width="0.01" layer="20"/>
 <wire x1="0" y1="38.02" x2="5" y2="33.02" width="0.01" layer="20"/>
-<wire x1="5" y1="33.02" x2="15" y2="33.02" width="0.01" layer="20"/>
-<wire x1="15" y1="33.02" x2="15" y2="30.48" width="0.01" layer="20"/>
-<wire x1="15" y1="30.48" x2="5" y2="30.48" width="0.01" layer="20"/>
+<wire x1="5" y1="33.02" x2="13.73" y2="33.02" width="0.01" layer="20"/>
+<wire x1="13.73" y1="33.02" x2="13.73" y2="30.48" width="0.01" layer="20"/>
+<wire x1="13.73" y1="30.48" x2="5" y2="30.48" width="0.01" layer="20"/>
 <wire x1="5" y1="30.48" x2="0" y2="25.48" width="0.01" layer="20"/>
 <wire x1="0" y1="25.48" x2="0" y2="5" width="0.01" layer="20"/>
 <wire x1="0" y1="5" x2="5" y2="0" width="0.01" layer="20"/>
@@ -452,15 +452,15 @@
 <wire x1="62.2613" y1="0" x2="67.2613" y2="5" width="0.01" layer="20"/>
 <wire x1="67.2613" y1="5" x2="67.2613" y2="25.48" width="0.01" layer="20"/>
 <wire x1="67.2613" y1="25.48" x2="62.2613" y2="30.48" width="0.01" layer="20"/>
-<wire x1="62.2613" y1="30.48" x2="52.2613" y2="30.48" width="0.01" layer="20"/>
-<wire x1="52.2613" y1="30.48" x2="52.2613" y2="33.02" width="0.01" layer="20"/>
-<wire x1="52.2613" y1="33.02" x2="62.2613" y2="33.02" width="0.01" layer="20"/>
+<wire x1="62.2613" y1="30.48" x2="53.5313" y2="30.48" width="0.01" layer="20"/>
+<wire x1="53.5313" y1="30.48" x2="53.5313" y2="33.02" width="0.01" layer="20"/>
+<wire x1="53.5313" y1="33.02" x2="62.2613" y2="33.02" width="0.01" layer="20"/>
 <wire x1="62.2613" y1="33.02" x2="67.2613" y2="38.02" width="0.01" layer="20"/>
 <wire x1="67.2613" y1="38.02" x2="67.2613" y2="58.5" width="0.01" layer="20"/>
 <wire x1="67.2613" y1="58.5" x2="62.2613" y2="63.5" width="0.01" layer="20"/>
-<wire x1="62.2613" y1="63.5" x2="52.2613" y2="63.5" width="0.01" layer="20"/>
-<wire x1="52.2613" y1="63.5" x2="52.2613" y2="66.04" width="0.01" layer="20"/>
-<wire x1="52.2613" y1="66.04" x2="62.2613" y2="66.04" width="0.01" layer="20"/>
+<wire x1="62.2613" y1="63.5" x2="53.5313" y2="63.5" width="0.01" layer="20"/>
+<wire x1="53.5313" y1="63.5" x2="53.5313" y2="66.04" width="0.01" layer="20"/>
+<wire x1="53.5313" y1="66.04" x2="62.2613" y2="66.04" width="0.01" layer="20"/>
 <wire x1="62.2613" y1="66.04" x2="67.2613" y2="71.04" width="0.01" layer="20"/>
 <wire x1="67.2613" y1="71.04" x2="67.2613" y2="91.52" width="0.01" layer="20"/>
 <wire x1="67.2613" y1="91.52" x2="62.2613" y2="96.52" width="0.01" layer="20"/>
