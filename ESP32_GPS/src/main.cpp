@@ -29,11 +29,16 @@ void setup() {
 }
 
 void loop() {
-    // delay(1000);
-    while (Serial2.available() > 0) {
-        char c = Serial2.read();
-        // Serial.print(c);
-        tinyGPS.encode(c);
+    // delay(100);
+    while (Serial2.available()) {
+        char buf[256]{NULL};
+        Serial.printf("\n\n -Avairable:%d\n\n", Serial2.available());
+        Serial2.readBytes(buf, Serial2.available());
+        for (size_t i = 0; i < 256; i++) {
+            if (buf[i] == NULL) break;
+            tinyGPS.encode(buf[i]);
+            Serial.print(buf[i]);
+        }
     }
     if (tinyGPS.location.isUpdated()) {
         data.gps.latitude = tinyGPS.location.lat();
@@ -41,7 +46,7 @@ void loop() {
         Serial.printf("%f,%f\r\n", data.gps.latitude, data.gps.longitude);
     }
 
-    char text[128];
+    // char text[128];
 
     read_pressure();
 
