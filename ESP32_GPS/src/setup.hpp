@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <TinyGPS++.h>
 #include <Ticker.h>
 
 #include <BluetoothSerial.h>
@@ -26,6 +27,7 @@ Ticker tick;
 OneWire oneWire(ONE_WIRE_BUS_PIN);
 DallasTemperature waterTemp(&oneWire);
 BluetoothSerial SerialBT;
+TinyGPSPlus tinyGPS;
 File myfile; // SDカードの状態を格納
 
 // multiTask
@@ -38,6 +40,10 @@ volatile struct {
     int32_t pressure;
     int32_t _pressure[2];
     uint32_t time;
+    struct {
+        double latitude;
+        double longitude;
+    } gps;
 } data;
 
 // prototypes
