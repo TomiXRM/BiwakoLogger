@@ -130,12 +130,11 @@ void loop() {
     // send packet: id is 11 bits, packet can contain up to 8 bytes of data
     Serial.print("Sending packet ... ");
 
-    CAN.beginPacket(0x12);
+    CAN.beginPacket(0x14);
+    CAN.write('t');
     CAN.write('h');
-    CAN.write('e');
-    CAN.write('l');
-    CAN.write('l');
-    CAN.write('o');
+    CAN.write('i');
+    CAN.write('s');
     CAN.endPacket();
 
     Serial.println("done");
@@ -145,12 +144,15 @@ void loop() {
     // send extended packet: id is 29 bits, packet can contain up to 8 bytes of data
     Serial.print("Sending extended packet ... ");
 
-    CAN.beginExtendedPacket(0xabcdef);
-    CAN.write('w');
+    CAN.beginExtendedPacket(0x15);
+    CAN.write('i');
+    CAN.write('s');
+    CAN.write(' ');
+    CAN.write('t');
     CAN.write('o');
-    CAN.write('r');
-    CAN.write('l');
-    CAN.write('d');
+    CAN.write('i');
+    CAN.write('m');
+    CAN.write('x');
     CAN.endPacket();
 
     Serial.println("done");

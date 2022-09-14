@@ -1,0 +1,5 @@
+timer KEYWORD1
+
+read_ms KEYWORD2
+read_us KEYWORD2
+reset KEYWORD2

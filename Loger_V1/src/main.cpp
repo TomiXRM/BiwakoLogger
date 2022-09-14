@@ -5,6 +5,11 @@
 #include <Ticker.h>
 #include <CAN.h>
 
+#include <Wire.h>
+#include <Adafruit_BNO055.h>
+#include <timer.h>
+#include <EEPROM.h>
+
 // pin definitions
 #define LED_PIN 2
 #define ONE_WIRE_BUS 33
@@ -13,90 +18,40 @@
 Ticker tick;
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature waterTemp(&oneWire);
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28); // BNO055のインスタンス
 
 // multiTask
 TaskHandle_t thp[2];
 QueueHandle_t xQueue_1;
 
+char mode = 'Z';
+
 // global variables
 volatile struct {
     float temp;
-    float pressur;
-    uint32_t time;
+    float pressure;
+    struct {
+        float x;
+        float y;
+        float z;
+    } accr;
+    struct {
+        float x;
+        float y;
+        float z;
+    } gyro;
+    struct {
+        float x;
+        float y;
+        float z;
+    } mag;
 } data;
+
+imu::Vector<3> accr, mag, gyro, eulr;
 
 // prototypes
 void Core0a(void *args);
 void Core1a(void *args);
-
-void setup() {
-    Serial.begin(115200);
-
-    CAN.setPins(25, 26);
-    if (!CAN.begin(500E3)) {
-        Serial.println("Starting CAN failed!");
-        while (1)
-            ;
-    }
-
-    // alive LED initialization
-    tick.attach_ms(10, []() {
-        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
-    });
-
-    // create tasks
-    xQueue_1 = xQueueCreate(10, 16);
-    xTaskCreatePinnedToCore(Core0a, "Core0a", 4096, NULL, 2, &thp[0], 0);
-    xTaskCreatePinnedToCore(Core1a, "Core1a", 4096, NULL, 1, &thp[1], 1);
-}
-
-void onReceive(int packetSize) {
-    Serial.print("Received ");
-
-    Serial.print("filter:");
-    Serial.print(CAN.filter(MODULE_ID)); // フィルター設定
-
-    if (CAN.packetExtended()) {
-        Serial.print(" extended ");
-    }
-
-    if (CAN.packetRtr()) {
-        // Remote transmission request, packet contains no data
-        Serial.print("RTR ");
-    }
-
-    Serial.print("packet with id 0x");
-    Serial.print(CAN.packetId(), HEX);
-
-    if (CAN.packetRtr()) { // RTRパケットの場合(送信リクエストが来た場合)
-        Serial.print(" and requested length ");
-        Serial.println(CAN.packetDlc());   //送信依頼の来ているデータのバイト数の表示
-        if (CAN.packetId() == MODULE_ID) { //パケットIDが自分のIDに一致した場合
-            Serial.println("Received packet is correct");
-            CAN.beginPacket(0x44); // パケットを送信するためにbeginPacket()を呼び出す
-            CAN.write('H');        //データ(1byte目)
-            CAN.write('E');        //データ(2byte目)
-            CAN.write('L');        //データ(3byte目)
-            CAN.write('L');        //データ(4byte目)
-            CAN.write('O');        //データ(5byte目)
-            CAN.endPacket();       // パケットを送信
-            Serial.println("sent packet");
-        } else {
-            Serial.println("Received packet is incorrect");
-        }
-    } else {
-        Serial.print(" and length ");
-        Serial.println(packetSize);
-
-        // only print packet data for non-RTR packets
-        while (CAN.available()) {
-            Serial.print((char)CAN.read());
-        }
-        Serial.println();
-    }
-
-    Serial.println();
-}
 
 // task1 (Core1) : read temperature and pressure
 void Core1a(void *args) {
@@ -118,10 +73,149 @@ void Core0a(void *args) {
     }
 }
 
-void loop() {
-    int packetSize = CAN.parsePacket(); //パケットサイズの確認
-    if (packetSize) {                   // CANバスからデータを受信したら
-        onReceive(packetSize);          //受信時に呼び出される関数を呼び出す
+void getIMU() {
+    mag = bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
+    accr = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
+    eulr = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+    gyro = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
+}
+void displaySensorOffsets(const adafruit_bno055_offsets_t &calibData) {
+    Serial.printf("Accelerometer:%d %d %d\n", calibData.accel_offset_x, calibData.accel_offset_y, calibData.accel_offset_z);
+    Serial.printf("Gyro:%d %d %d\n", calibData.gyro_offset_x, calibData.gyro_offset_y, calibData.gyro_offset_z);
+    Serial.printf("Mag:%d %d %d\n", calibData.mag_offset_x, calibData.mag_offset_y, calibData.mag_offset_z);
+    Serial.printf("Accel Radius:%d\n", calibData.accel_radius);
+    Serial.printf("Mag Radius:%d\n\n", calibData.mag_radius);
+}
+
+void imuCalib() {
+    if (!bno.isFullyCalibrated()) {
+        uint8_t s, g, a, m = 0;
+        bno.getCalibration(&s, &g, &a, &m);
+        Serial.print("\t");
+        if (!s) {
+            Serial.print("! ");
+        }
+        Serial.print("CALIBRATION: Sys=");
+        Serial.print(s, DEC);
+        Serial.print(" Gyro=");
+        Serial.print(g, DEC);
+        Serial.print(" Accel=");
+        Serial.print(a, DEC);
+        Serial.print(" Mag=");
+        Serial.println(m, DEC);
+    } else {
+        Serial.println("\nFully calibrated!");
+        adafruit_bno055_offsets_t newCalib;
+        bno.getSensorOffsets(newCalib);
+        displaySensorOffsets(newCalib);
+        int eeAddress = 0;
+        sensor_t sensor;
+        bno.getSensor(&sensor);
+        long bnoID = sensor.sensor_id;
+        EEPROM.put(eeAddress, bnoID);
+        eeAddress += sizeof(long);
+        EEPROM.put(eeAddress, newCalib);
+        Serial.println("Data stored to EEPROM.");
+        delay(1000);
+        mode = 'Z';
     }
-    Serial.println(data.temp);
+}
+
+void setup() {
+    Serial.begin(2000000);
+    CAN.setPins(25, 26);
+    uint8_t c = 0;
+    while (!CAN.begin(500E3)) {
+        c++;
+        Serial.println("Starting CAN failed!");
+        delay(1000);
+        if (c > 20) {
+            Serial.println("Reboot reason : CAN failed");
+            ESP.restart();
+        }
+    }
+    c = 0;
+    while (!bno.begin()) {
+        c++;
+        Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+        delay(1000);
+        if (c > 20) {
+            Serial.println("Reboot reason : BNO055 failed");
+            ESP.restart();
+        }
+    }
+
+    int eeAddress = 0;
+    long bnoID;
+    adafruit_bno055_offsets_t calibrationData;
+    sensor_t sensor;
+    EEPROM.get(eeAddress, bnoID);
+
+    bno.getSensor(&sensor);
+    if (bnoID != sensor.sensor_id) {
+        Serial.println("\nNo Calibration Data for this sensor exists in EEPROM");
+        delay(500);
+    } else {
+        Serial.println("\nFound Calibration for this sensor in EEPROM.");
+        eeAddress += sizeof(long);
+        EEPROM.get(eeAddress, calibrationData);
+
+        displaySensorOffsets(calibrationData);
+
+        Serial.println("\n\nRestoring Calibration data to the BNO055...");
+        bno.setSensorOffsets(calibrationData);
+
+        Serial.println("\n\nCalibration data loaded into BNO055");
+        foundCalib = true;
+    }
+
+    // alive LED initialization
+    tick.attach_ms(10, []() {
+        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+    });
+    // create tasks
+    xQueue_1 = xQueueCreate(10, 16);
+    xTaskCreatePinnedToCore(Core0a, "Core0a", 4096, NULL, 2, &thp[0], 0);
+    xTaskCreatePinnedToCore(Core1a, "Core1a", 4096, NULL, 1, &thp[1], 1);
+}
+
+void loop() {
+    if (Serial.available() > 0) {
+        char buf[256]{NULL};
+        size_t bufSize = Serial.available();
+        Serial.readBytesUntil('\n', buf, bufSize);
+        Serial.printf(" --read:%s,", buf);
+        mode = buf[0];
+        delay(500);
+    } else {
+        getIMU();
+        switch (mode) {
+        case 'A':
+            Serial.printf("ACC:%f,%f%,%f\r\n", accr.x(), accr.y(), accr.z());
+            break;
+        case 'G':
+            Serial.printf("GYR:%f,%f%,%f\r\n", gyro.x(), gyro.y(), gyro.z());
+            break;
+        case 'E':
+            Serial.printf("EUR:%f,%f%,%f\r\n", eulr.x(), eulr.y(), eulr.z());
+            break;
+        case 'M':
+            Serial.printf("MAG:%f,%f%,%f\r\n", mag.x(), mag.y(), mag.z());
+            break;
+        case 'C':
+            imuCalib();
+            break;
+        case 'Z':
+        default:
+            Serial.printf("EUR:%f,%f%,%f\r\n", eulr.x(), eulr.y(), eulr.z());
+            Serial.printf("MAG:%f,%f%,%f\r\n", mag.x(), mag.y(), mag.z());
+            Serial.printf("ACC:%f,%f%,%f\r\n", accr.x(), accr.y(), accr.z());
+            Serial.printf("GYR:%f,%f%,%f\r\n", gyro.x(), gyro.y(), gyro.z());
+            break;
+        }
+        Serial.print("\033[2J");
+        delay(10);
+    }
+    // Serial.println(data.temp);
+    // Serial.printf("wp,%d,wt,%.2f", data.pressure, data.temp);
 }
