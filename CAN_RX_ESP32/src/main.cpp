@@ -1,5 +1,5 @@
 // Master
-// #define CHECK2
+#define CHECK2
 #ifdef CHECK2
 #include <CAN.h>
 #include <Ticker.h>
@@ -23,8 +23,8 @@ void setup() {
     Serial.println("CAN Receiver Callback");
 
     // CAN通信を初期化
-    CAN.setPins(25, 26);     // CAN_RX, CAN_TX
-    if (!CAN.begin(500E3)) { // 500kbpsで初期化
+    CAN.setPins(25, 26);      // CAN_RX, CAN_TX
+    if (!CAN.begin(1000E3)) { // 500kbpsで初期化
         Serial.println("Starting CAN failed!");
         while (1)
             ;
@@ -57,7 +57,6 @@ void onReceive(int packetSize) {
     } else {
         Serial.print(" and length ");
         Serial.println(packetSize);
-
         // only print packet data for non-RTR packets
         while (CAN.available()) {
             Serial.print((char)CAN.read());
@@ -71,8 +70,8 @@ void onReceive(int packetSize) {
 void loop() {
     Serial.println("loop");
     CAN.beginPacket(0x100, 5, true); // Slaveにデータ送信のリクエスト(RTR設定)
-    CAN.endPacket();                 // Slaveにデータ送信のリクエスト(送信)
-    delay(1000);
+    CAN.endPacket();                  // Slaveにデータ送信のリクエスト(送信)
+    delay(100);
 }
 #endif
 #ifndef CHECK2
@@ -96,8 +95,8 @@ void onReceive(int packetSize) {
         Serial.print("RTR ");
     }
 
-    Serial.print("packet with id 0x");
-    Serial.print(CAN.packetId(), HEX);
+    Serial.print("packet with id ");
+    Serial.print(CAN.packetId());
 
     if (CAN.packetRtr()) {
         Serial.print(" and requested length ");

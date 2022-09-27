@@ -31,21 +31,32 @@ volatile struct {
     float temp;
     float pressure;
     struct {
-        float x;
-        float y;
-        float z;
+        double x;
+        double y;
+        double z;
     } accr;
     struct {
-        float x;
-        float y;
-        float z;
+        double x;
+        double y;
+        double z;
     } gyro;
     struct {
-        float x;
-        float y;
-        float z;
+        double x;
+        double y;
+        double z;
     } mag;
+    struct {
+        double x;
+        double y;
+        double z;
+    } eulr;
 } data;
+
+typedef union {
+    double d;
+    float f;
+    uint8_t b[4];
+} u;
 
 imu::Vector<3> accr, mag, gyro, eulr;
 
@@ -78,6 +89,8 @@ void getIMU() {
     accr = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
     eulr = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
     gyro = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
+    // data.accr = {accr.x(), accr.y(), accr.z()};
+    // data.accr = {accr.x(), accr.y(), accr.z()};
 }
 void displaySensorOffsets(const adafruit_bno055_offsets_t &calibData) {
     Serial.printf("Accelerometer:%d %d %d\n", calibData.accel_offset_x, calibData.accel_offset_y, calibData.accel_offset_z);
@@ -149,6 +162,7 @@ void setup() {
     long bnoID;
     adafruit_bno055_offsets_t calibrationData;
     sensor_t sensor;
+    EEPROM.begin(64);
     EEPROM.get(eeAddress, bnoID);
 
     bno.getSensor(&sensor);
@@ -166,7 +180,7 @@ void setup() {
         bno.setSensorOffsets(calibrationData);
 
         Serial.println("\n\nCalibration data loaded into BNO055");
-        foundCalib = true;
+        // foundCalib = true;
     }
 
     // alive LED initialization
@@ -177,6 +191,25 @@ void setup() {
     xQueue_1 = xQueueCreate(10, 16);
     xTaskCreatePinnedToCore(Core0a, "Core0a", 4096, NULL, 2, &thp[0], 0);
     xTaskCreatePinnedToCore(Core1a, "Core1a", 4096, NULL, 1, &thp[1], 1);
+}
+
+void sendFloat(float data) {
+    u data_;
+    data_.f = data;
+    CAN.write(data_.b, 4);
+}
+
+void sendData() {
+    CAN.beginPacket(0x100);
+    sendFloat(data.temp);
+    sendFloat(data.pressure);
+    sendFloat(data.accr.x);
+    sendFloat(data.accr.y);
+    sendFloat(data.accr.z);
+    sendFloat(data.mag.x);
+    sendFloat(data.mag.y);
+    sendFloat(data.mag.z);
+    CAN.endPacket();
 }
 
 void loop() {

@@ -1,5 +1,5 @@
 // Slave
-// #define CHECK2
+#define CHECK2
 #ifdef CHECK2
 #include <CAN.h>
 #include <Ticker.h>
@@ -25,8 +25,8 @@ void setup() {
     Serial.println("CAN Receiver Callback");
 
     // CAN通信を初期化
-    CAN.setPins(25, 26);     // CAN_RX, CAN_TX
-    if (!CAN.begin(500E3)) { // 500kbpsで初期化
+    CAN.setPins(25, 26);      // CAN_RX, CAN_TX
+    if (!CAN.begin(1000E3)) { // 500kbpsで初期化
         Serial.println("Starting CAN failed!");
         while (1)
             ;
@@ -61,12 +61,31 @@ void onReceive(int packetSize) {
         if (CAN.packetId() == MODULE_ID) { //パケットIDが自分のIDに一致した場合
             Serial.println("Received packet is correct");
             CAN.beginPacket(0x44); // パケットを送信するためにbeginPacket()を呼び出す
-            CAN.write('H');        //データ(1byte目)
-            CAN.write('E');        //データ(2byte目)
-            CAN.write('L');        //データ(3byte目)
-            CAN.write('L');        //データ(4byte目)
-            CAN.write('O');        //データ(5byte目)
-            CAN.endPacket();       // パケットを送信
+            for (size_t i = 0; i < 8; i++) {
+                CAN.write('A' + i);
+            }
+            CAN.endPacket(); // パケットを送信
+
+            CAN.beginExtendedPacket(0x45);
+            for (size_t i = 0; i < 8; i++) {
+                CAN.write('I' + i);
+            }
+            CAN.endPacket(); // パケットを送信
+            CAN.beginExtendedPacket(0x46);
+            for (size_t i = 0; i < 8; i++) {
+                CAN.write('P' + i);
+            }
+            CAN.endPacket(); // パケットを送信
+            CAN.beginExtendedPacket(0x47);
+            for (size_t i = 0; i < 8; i++) {
+                CAN.write('X' + i);
+            }
+            CAN.endPacket(); // パケットを送信
+            CAN.beginExtendedPacket(0x48);
+            for (size_t i = 0; i < 8; i++) {
+                CAN.write('_' + i);
+            }
+            CAN.endPacket(); // パケットを送信
             Serial.println("sent packet");
         } else {
             Serial.println("Received packet is incorrect");
@@ -86,13 +105,11 @@ void onReceive(int packetSize) {
 }
 
 void loop() {
-
     int packetSize = CAN.parsePacket(); //パケットサイズの確認
     if (packetSize) {                   // CANバスからデータを受信したら
         onReceive(packetSize);          //受信時に呼び出される関数を呼び出す
     } else {
         Serial.println("loop");
-        delay(100);
     }
 }
 #endif
@@ -130,7 +147,7 @@ void loop() {
     // send packet: id is 11 bits, packet can contain up to 8 bytes of data
     Serial.print("Sending packet ... ");
 
-    CAN.beginPacket(0x14);
+    CAN.beginPacket(190);
     CAN.write('t');
     CAN.write('h');
     CAN.write('i');
@@ -144,7 +161,7 @@ void loop() {
     // send extended packet: id is 29 bits, packet can contain up to 8 bytes of data
     Serial.print("Sending extended packet ... ");
 
-    CAN.beginExtendedPacket(0x15);
+    CAN.beginExtendedPacket(200);
     CAN.write('i');
     CAN.write('s');
     CAN.write(' ');
