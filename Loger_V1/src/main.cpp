@@ -16,6 +16,7 @@
 #define ONE_WIRE_BUS 33
 #define PRESSURE_SENSOR_PIN 32
 #define HOSTNAME "ESP32-1"
+#define MY_ID 0x01
 
 // create instance
 Ticker tick;
@@ -38,7 +39,7 @@ volatile struct {
         float x;
         float y;
         float z;
-    } accr;
+    } accel;
     struct {
         float x;
         float y;
@@ -53,7 +54,7 @@ volatile struct {
         float x;
         float y;
         float z;
-    } eulr;
+    } euler;
 
     struct {
         float x;
@@ -70,10 +71,11 @@ volatile struct {
 
 typedef union {
     float f;
+    uint32_t i;
     uint8_t b[4];
-} u;
+} uBytes;
 
-imu::Vector<3> accr, mag, gyro, eulr, grav;
+imu::Vector<3> accel, mag, gyro, euler, grav;
 
 // prototypes
 void Core0a(void *args);
@@ -102,10 +104,10 @@ void Core0a(void *args) {
 
 void getIMU() {
     // accels
-    accr = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
-    data.accr.x = (float)accr.x();
-    data.accr.y = (float)accr.y();
-    data.accr.z = (float)accr.z();
+    accel = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
+    data.accel.x = (float)accel.x();
+    data.accel.y = (float)accel.y();
+    data.accel.z = (float)accel.z();
 
     imu::Quaternion quat = bno.getQuat();
     data.quat.w = (float)quat.w();
@@ -118,11 +120,11 @@ void getIMU() {
     data.grav.x = (float)grav.x();
     data.grav.y = (float)grav.y();
     data.grav.z = (float)grav.z();
-    // eulr
-    eulr = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
-    data.eulr.x = (float)eulr.x();
-    data.eulr.y = (float)eulr.y();
-    data.eulr.z = (float)eulr.z();
+    // euler
+    euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+    data.euler.x = (float)euler.x();
+    data.euler.y = (float)euler.y();
+    data.euler.z = (float)euler.z();
     // mag
     mag = bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
     data.mag.x = (float)mag.x();
@@ -245,23 +247,52 @@ void setup() {
     xTaskCreatePinnedToCore(Core1a, "Core1a", 4096, NULL, 1, &thp[1], 1);
 }
 
-void sendFloat(float data) {
-    u data_;
+void sendFloat(int id, float data) {
+    uBytes data_;
     data_.f = data;
+    if (id == MY_ID) {
+        CAN.beginPacket(MY_ID);
+    } else {
+        CAN.beginExtendedPacket(id);
+    }
     CAN.write(data_.b, 4);
+    CAN.endPacket();
+}
+
+void sendUint32(int id, uint32_t data) {
+    uBytes data_;
+    data_.i = data;
+    if (id == MY_ID) {
+        CAN.beginPacket(MY_ID);
+    } else {
+        CAN.beginExtendedPacket(id);
+    }
+    CAN.write(data_.b, 4);
+    CAN.endPacket();
 }
 
 void sendData() {
-    CAN.beginPacket(0x100);
-    sendFloat(data.temp);
-    sendFloat(data.pressure);
-    sendFloat(data.accr.x);
-    sendFloat(data.accr.y);
-    sendFloat(data.accr.z);
-    sendFloat(data.mag.x);
-    sendFloat(data.mag.y);
-    sendFloat(data.mag.z);
-    CAN.endPacket();
+    sendFloat(MY_ID, data.temp);
+    sendUint32(MY_ID + 1, data.pressure);
+    sendFloat(MY_ID + 2, data.grav.x);
+    sendFloat(MY_ID + 3, data.grav.y);
+    sendFloat(MY_ID + 4, data.grav.z);
+    sendFloat(MY_ID + 5, data.accel.x);
+    sendFloat(MY_ID + 6, data.accel.y);
+    sendFloat(MY_ID + 7, data.accel.z);
+    sendFloat(MY_ID + 8, data.mag.x);
+    sendFloat(MY_ID + 9, data.mag.y);
+    sendFloat(MY_ID + 10, data.mag.z);
+    sendFloat(MY_ID + 11, data.euler.x);
+    sendFloat(MY_ID + 12, data.euler.y);
+    sendFloat(MY_ID + 13, data.euler.z);
+    sendFloat(MY_ID + 14, data.quat.w);
+    sendFloat(MY_ID + 15, data.quat.x);
+    sendFloat(MY_ID + 16, data.quat.y);
+    sendFloat(MY_ID + 17, data.quat.z);
+    sendFloat(MY_ID + 18, data.gyro.x);
+    sendFloat(MY_ID + 19, data.gyro.y);
+    sendFloat(MY_ID + 20, data.gyro.z);
 }
 
 void loop() {
@@ -288,8 +319,8 @@ void loop() {
             imuCalib();
             break;
         case 'A':
-            Serial.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", data.accr.x, data.accr.y, data.accr.z);
-            SerialBT.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", data.accr.x, data.accr.y, data.accr.z);
+            Serial.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", data.accel.x, data.accel.y, data.accel.z);
+            SerialBT.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", data.accel.x, data.accel.y, data.accel.z);
             break;
         case 'V':
             Serial.printf("GRV:%.4f\t,%.4f\t,%.4f\r\n", data.grav.x, data.grav.y, data.grav.z);
@@ -304,8 +335,8 @@ void loop() {
             SerialBT.printf("MAG:%.4f\t,%.4f\t,%.4f\r\n", data.mag.x, data.mag.y, data.mag.z);
             break;
         case 'E':
-            Serial.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.eulr.x, data.eulr.y, data.eulr.z);
-            SerialBT.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.eulr.x, data.eulr.y, data.eulr.z);
+            Serial.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.euler.x, data.euler.y, data.euler.z);
+            SerialBT.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.euler.x, data.euler.y, data.euler.z);
             break;
         case 'Q':
             Serial.printf("QUAT:%.4f\t,%.4f\t,%.4f\t,%.4f\r\n", data.quat.w, data.quat.x, data.quat.y, data.quat.z);
@@ -317,25 +348,26 @@ void loop() {
             break;
         case 'Z':
         default:
-            Serial.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", data.accr.x, data.accr.y, data.accr.z);
-            Serial.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.eulr.x, data.eulr.y, data.eulr.z);
+            Serial.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", data.accel.x, data.accel.y, data.accel.z);
+            Serial.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.euler.x, data.euler.y, data.euler.z);
             Serial.printf("GYR:%.4f\t,%.4f\t,%.4f\r\n", data.gyro.x, data.gyro.y, data.gyro.z);
             Serial.printf("MAG:%.4f\t,%.4f\t,%.4f\r\n", data.mag.x, data.mag.y, data.mag.z);
-            Serial.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.eulr.x, data.eulr.y, data.eulr.z);
+            Serial.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.euler.x, data.euler.y, data.euler.z);
             Serial.printf("QUAT:%.4f\t,%.4f\t,%.4f\t,%.4f\r\n", data.quat.w, data.quat.x, data.quat.y, data.quat.z);
             Serial.printf("WP,%d,WT,%.2f\r\n", data.pressure, data.temp);
 
-            SerialBT.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", data.accr.x, data.accr.y, data.accr.z);
-            SerialBT.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.eulr.x, data.eulr.y, data.eulr.z);
+            SerialBT.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", data.accel.x, data.accel.y, data.accel.z);
+            SerialBT.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.euler.x, data.euler.y, data.euler.z);
             SerialBT.printf("GYR:%.4f\t,%.4f\t,%.4f\r\n", data.gyro.x, data.gyro.y, data.gyro.z);
             SerialBT.printf("MAG:%.4f\t,%.4f\t,%.4f\r\n", data.mag.x, data.mag.y, data.mag.z);
-            SerialBT.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.eulr.x, data.eulr.y, data.eulr.z);
+            SerialBT.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.euler.x, data.euler.y, data.euler.z);
             SerialBT.printf("QUAT:%.4f\t,%.4f\t,%.4f\t,%.4f\r\n", data.quat.w, data.quat.x, data.quat.y, data.quat.z);
             SerialBT.printf("WP,%d,WT,%.2f\r\n", data.pressure, data.temp);
             break;
         }
         Serial.print("\033[2J");
         Serial.print("\033[H");
+
         delay(10);
     }
 }
