@@ -81,7 +81,7 @@ void onReceive(int packetSize) {
                 CAN.write('X' + i);
             }
             CAN.endPacket(); // パケットを送信
-            CAN.beginExtendedPacket(0x48);
+            CAN.beginExtendedPacket(0x4);
             for (size_t i = 0; i < 8; i++) {
                 CAN.write('_' + i);
             }
