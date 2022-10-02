@@ -45,7 +45,7 @@ class sensors3_t {
 
 class sensors4_t {
   public:
-    sensors3_t(int id, const char *name, const char *unit)
+    sensors4_t(int id, const char *name, const char *unit)
         : w(id + 1, "W", unit),
           x(id + 2, "X", unit),
           y(id + 3, "Y", unit),
@@ -55,6 +55,7 @@ class sensors4_t {
     }
     int id;
     const char *name;
+    sensor1_t w;
     sensor1_t x;
     sensor1_t y;
     sensor1_t z;
@@ -67,7 +68,7 @@ void printXYZValues(sensors3_t &sensor) {
     printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.z.name, (float)sensor.z, sensor.z.unit, sensor.z.id);
 }
 void printValue(sensor1_t &sensor) {
-    printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, (float)sensor.x, sensor.unit, sensor.id);
+    printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, (float)sensor, sensor.unit, sensor.id);
 }
 
 void printBytes(sensor1_t &sensor) {

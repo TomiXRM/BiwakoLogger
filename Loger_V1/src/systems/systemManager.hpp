@@ -1,7 +1,7 @@
 #ifndef SYSTEM_HPP
 #define SYSTEM_HPP
 
-#include "../setup/setup.hpp"
+// #include "../setup/setup.hpp"
 
 class system {
   public:
