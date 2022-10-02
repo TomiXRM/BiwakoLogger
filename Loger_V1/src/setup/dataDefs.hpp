@@ -2,6 +2,14 @@
 #define DATADEFS_HPP
 #include <Arduino.h>
 
+typedef struct {
+    char *modeName;
+    char modeLetter;
+    void (*before)();
+    void (*body)();
+    void (*after)();
+} Mode_t;
+
 class sensor1_t {
   public:
     sensor1_t(int id, const char *name, const char *unit) {
@@ -62,17 +70,17 @@ class sensors4_t {
 };
 
 // print関数
-void printXYZValues(sensors3_t &sensor) {
-    printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.x.name, (float)sensor.x, sensor.x.unit, sensor.x.id);
-    printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.y.name, (float)sensor.y, sensor.y.unit, sensor.y.id);
-    printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.z.name, (float)sensor.z, sensor.z.unit, sensor.z.id);
-}
-void printValue(sensor1_t &sensor) {
-    printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, (float)sensor, sensor.unit, sensor.id);
-}
+// void printXYZValues(sensors3_t &sensor) {
+//     printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.x.name, (float)sensor.x, sensor.x.unit, sensor.x.id);
+//     printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.y.name, (float)sensor.y, sensor.y.unit, sensor.y.id);
+//     printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.z.name, (float)sensor.z, sensor.z.unit, sensor.z.id);
+// }
+// void printValue(sensor1_t &sensor) {
+//     printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, (float)sensor, sensor.unit, sensor.id);
+// }
 
-void printBytes(sensor1_t &sensor) {
-    printf("%d %d %d %d\n", sensor.value.u8[0], sensor.value.u8[1], sensor.value.u8[2], sensor.value.u8[3]);
-}
+// void printBytes(sensor1_t &sensor) {
+//     printf("%d %d %d %d\n", sensor.value.u8[0], sensor.value.u8[1], sensor.value.u8[2], sensor.value.u8[3]);
+// }
 
 #endif

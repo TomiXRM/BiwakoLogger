@@ -12,9 +12,6 @@ struct {
     sensors4_t quat{107, "quat", ""};
 } data;
 // create instance
-Ticker tick;
-BluetoothSerial SerialBT;
-char mode = 'Z';
 // multiTask
 TaskHandle_t thp[2];
 QueueHandle_t xQueue_1;
@@ -131,23 +128,23 @@ void imuCalib() {
         EEPROM.put(eeAddress, newCalib);
         Serial.println("Data stored to EEPROM.");
         delay(1000);
-        mode = 'Z';
+        // //mode = 'Z';
     }
 }
 
 void setup() {
     Serial.begin(2000000);
-    SerialBT.begin(HOSTNAME);
+
     CAN.setPins(25, 26);
     uint8_t c = 0;
     while (!CAN.begin(1000E3)) {
         c++;
         Serial.println("Starting CAN failed!");
-        SerialBT.println("Starting CAN failed!");
+        // SerialBT.println("Starting CAN failed!");
         delay(1000);
         if (c > 20) {
             Serial.println("Reboot reason : CAN failed");
-            SerialBT.println("Reboot reason : CAN failed");
+            // SerialBT.println("Reboot reason : CAN failed");
             ESP.restart();
         }
     }
@@ -155,11 +152,11 @@ void setup() {
     while (!bno.begin()) {
         c++;
         Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-        SerialBT.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+        // SerialBT.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
         delay(1000);
         if (c > 20) {
             Serial.println("Reboot reason : BNO055 failed");
-            SerialBT.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+            // SerialBT.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
             ESP.restart();
         }
     }
@@ -174,29 +171,27 @@ void setup() {
     bno.getSensor(&sensor);
     if (bnoID != sensor.sensor_id) {
         Serial.println("\nNo Calibration Data for this sensor exists in EEPROM");
-        SerialBT.println("\nNo Calibration Data for this sensor exists in EEPROM");
+        // SerialBT.println("\nNo Calibration Data for this sensor exists in EEPROM");
         delay(500);
     } else {
         Serial.println("\nFound Calibration for this sensor in EEPROM.");
-        SerialBT.println("\nFound Calibration for this sensor in EEPROM.");
+        // SerialBT.println("\nFound Calibration for this sensor in EEPROM.");
         eeAddress += sizeof(long);
         EEPROM.get(eeAddress, calibrationData);
 
         displaySensorOffsets(calibrationData);
 
         Serial.println("\n\nRestoring Calibration data to the BNO055...");
-        SerialBT.println("\n\nRestoring Calibration data to the BNO055...");
+        // SerialBT.println("\n\nRestoring Calibration data to the BNO055...");
         bno.setSensorOffsets(calibrationData);
 
         Serial.println("\n\nCalibration data loaded into BNO055");
-        SerialBT.println("\n\nCalibration data loaded into BNO055");
-        // foundCalib = true;
+        // SerialBT.println("\n\nCalibration data loaded into BNO055");
+        //  foundCalib = true;
     }
 
     // alive LED initialization
-    tick.attach_ms(10, []() {
-        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
-    });
+
     // create tasks
     xQueue_1 = xQueueCreate(10, 16);
     xTaskCreatePinnedToCore(Core0a, "Core0a", 4096, NULL, 2, &thp[0], 0);
@@ -252,78 +247,5 @@ void sendData() {
 }
 
 void loop() {
-    uint16_t serialAvailable = Serial.available();
-    uint16_t serialBTAvailable = SerialBT.available();
-    if (serialAvailable > 0 || serialBTAvailable > 0) {
-        char buf[256]{NULL};
-        if (serialAvailable > 0) {
-            size_t bufSize = serialAvailable;
-            Serial.readBytesUntil('\n', buf, bufSize);
-            Serial.printf(" --read:%s,", buf);
-            mode = buf[0];
-        } else if (serialBTAvailable > 0) {
-            size_t bufSize = serialBTAvailable;
-            SerialBT.readBytesUntil('\n', buf, bufSize);
-            SerialBT.printf(" --read:%s,", buf);
-            mode = buf[0];
-        }
-        delay(500);
-    } else {
-        getIMU();
-        switch (mode) {
-        case 'C':
-            imuCalib();
-            break;
-        case 'A':
-            Serial.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", (float)data.accel.x, (float)data.accel.y, (float)data.accel.z);
-            SerialBT.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", (float)data.accel.x, (float)data.accel.y, (float)data.accel.z);
-            break;
-        case 'V':
-            Serial.printf("GRV:%.4f\t,%.4f\t,%.4f\r\n", (float)data.grav.x, (float)data.grav.y, (float)data.grav.z);
-            SerialBT.printf("GRV:%.4f\t,%.4f\t,%.4f\r\n", (float)data.grav.x, (float)data.grav.y, (float)data.grav.z);
-            break;
-        case 'G':
-            Serial.printf("GYR:%.4f\t,%.4f\t,%.4f\r\n", (float)data.gyro.x, (float)data.gyro.y, (float)data.gyro.z);
-            SerialBT.printf("GYR:%.4f\t,%.4f\t,%.4f\r\n", (float)data.gyro.x, (float)data.gyro.y, (float)data.gyro.z);
-            break;
-        case 'M':
-            Serial.printf("MAG:%.4f\t,%.4f\t,%.4f\r\n", (float)data.mag.x, (float)data.mag.y, (float)data.mag.z);
-            SerialBT.printf("MAG:%.4f\t,%.4f\t,%.4f\r\n", (float)data.mag.x, (float)data.mag.y, (float)data.mag.z);
-            break;
-        case 'E':
-            Serial.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", (float)data.euler.x, (float)data.euler.y, (float)data.euler.z);
-            SerialBT.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", (float)data.euler.x, (float)data.euler.y, (float)data.euler.z);
-            break;
-        case 'Q':
-            Serial.printf("QUAT:%.4f\t,%.4f\t,%.4f\t,%.4f\r\n", (float)data.quat.w, (float)data.quat.x, (float)data.quat.y, (float)data.quat.z);
-            SerialBT.printf("QUAT:%.4f\t,%.4f\t,%.4f\t,%.4f\r\n", (float)data.quat.w, (float)data.quat.x, (float)data.quat.y, (float)data.quat.z);
-            break;
-        case 'W':
-            Serial.printf("WP,%d,WT,%.2f\r\n", (float)data.press, (float)data.temp);
-            SerialBT.printf("WP,%d,WT,%.2f\r\n", (float)data.press, (float)data.temp);
-            break;
-        case 'Z':
-        default:
-            Serial.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", (float)data.accel.x, (float)data.accel.y, (float)data.accel.z);
-            Serial.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", (float)data.euler.x, (float)data.euler.y, (float)data.euler.z);
-            Serial.printf("GYR:%.4f\t,%.4f\t,%.4f\r\n", (float)data.gyro.x, (float)data.gyro.y, (float)data.gyro.z);
-            Serial.printf("MAG:%.4f\t,%.4f\t,%.4f\r\n", (float)data.mag.x, (float)data.mag.y, (float)data.mag.z);
-            Serial.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", (float)data.euler.x, (float)data.euler.y, (float)data.euler.z);
-            Serial.printf("QUAT:%.4f\t,%.4f\t,%.4f\t,%.4f\r\n", (float)data.quat.w, (float)data.quat.x, (float)data.quat.y, (float)data.quat.z);
-            Serial.printf("WP,%d,WT,%.2f\r\n", (float)data.press, (float)data.temp);
-
-            SerialBT.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", (float)data.accel.x, (float)data.accel.y, (float)data.accel.z);
-            SerialBT.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", (float)data.euler.x, (float)data.euler.y, (float)data.euler.z);
-            SerialBT.printf("GYR:%.4f\t,%.4f\t,%.4f\r\n", (float)data.gyro.x, (float)data.gyro.y, (float)data.gyro.z);
-            SerialBT.printf("MAG:%.4f\t,%.4f\t,%.4f\r\n", (float)data.mag.x, (float)data.mag.y, (float)data.mag.z);
-            SerialBT.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", (float)data.euler.x, (float)data.euler.y, (float)data.euler.z);
-            SerialBT.printf("QUAT:%.4f\t,%.4f\t,%.4f\t,%.4f\r\n", (float)data.quat.w, (float)data.quat.x, (float)data.quat.y, (float)data.quat.z);
-            SerialBT.printf("WP,%d,WT,%.2f\r\n", (float)data.press, (float)data.temp);
-            break;
-        }
-        Serial.print("\033[2J");
-        Serial.print("\033[H");
-
-        delay(10);
-    }
+    
 }
