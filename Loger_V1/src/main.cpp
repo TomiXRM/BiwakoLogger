@@ -1,73 +1,29 @@
 // read waterTemperature with multitasking and display it on the screen
-#include <Arduino.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
-#include <Ticker.h>
-#include <CAN.h>
+#include "./setup/setup.hpp"
 
-#include <Wire.h>
-#include <Adafruit_BNO055.h>
-#include <timer.h>
-#include <EEPROM.h>
-#include <BluetoothSerial.h>
-
-// pin definitions
-#define LED_PIN 2
-#define ONE_WIRE_BUS 33
-#define PRESSURE_SENSOR_PIN 32
-#define HOSTNAME "ESP32-1"
-#define MY_ID 0x01
-
+struct {
+    sensor1_t temp = {0x01, "temp", "℃", 0};
+    sensor1_t press = {0x02, "pressure", "", 0};
+    sensors3_t gyro = {0x03, "gyro", "rad/s", 0, 0, 0};
+    sensors3_t accel = {0x04, "accel", "m/s^2", 0, 0, 0};
+    sensors3_t mag = {0x05, "mag", "uT", 0, 0, 0};
+    sensors3_t euler = {0x06, "euler", "°", 0, 0, 0};
+    sensors4_t quat = {0x07, "quat", "", 0, 0, 0, 0};
+    sensors3_t grav = {0x05, "grav", "m/s^2", 0, 0, 0};
+} data;
 // create instance
 Ticker tick;
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature waterTemp(&oneWire);
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28); // BNO055のインスタンス
 BluetoothSerial SerialBT;
-
+char mode = 'Z';
 // multiTask
 TaskHandle_t thp[2];
 QueueHandle_t xQueue_1;
 
-char mode = 'Z';
+// sensors
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature waterTemp(&oneWire);
 
-// global variables
-volatile struct {
-    float temp;
-    uint32_t pressure;
-    struct {
-        float x;
-        float y;
-        float z;
-    } accel;
-    struct {
-        float x;
-        float y;
-        float z;
-    } gyro;
-    struct {
-        float x;
-        float y;
-        float z;
-    } mag;
-    struct {
-        float x;
-        float y;
-        float z;
-    } euler;
-
-    struct {
-        float x;
-        float y;
-        float z;
-    } grav;
-    struct {
-        float w;
-        float x;
-        float y;
-        float z;
-    } quat;
-} data;
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28); // BNO055のインスタンス
 
 typedef union {
     float f;
@@ -97,44 +53,44 @@ void Core0a(void *args) {
     while (1) {
         // wait for queue to be filled
         xQueueReceive(xQueue_1, &tmp, portMAX_DELAY);
-        data.temp = tmp; // put to global variable
-        data.pressure = analogRead(PRESSURE_SENSOR_PIN);
+        data.temp.value = tmp; // put to global variable
+        data.press.value = analogRead(PRESSURE_SENSOR_PIN);
     }
 }
 
 void getIMU() {
     // accels
     accel = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
-    data.accel.x = (float)accel.x();
-    data.accel.y = (float)accel.y();
-    data.accel.z = (float)accel.z();
+    data.accel.x.value = (float)accel.x();
+    data.accel.y.value = (float)accel.y();
+    data.accel.z.value = (float)accel.z();
 
     imu::Quaternion quat = bno.getQuat();
-    data.quat.w = (float)quat.w();
-    data.quat.x = (float)quat.x();
-    data.quat.y = (float)quat.y();
-    data.quat.z = (float)quat.z();
+    data.quat.w.value = (float)quat.w();
+    data.quat.x.value = (float)quat.x();
+    data.quat.y.value = (float)quat.y();
+    data.quat.z.value = (float)quat.z();
 
     // gravity
     grav = bno.getVector(Adafruit_BNO055::VECTOR_GRAVITY);
-    data.grav.x = (float)grav.x();
-    data.grav.y = (float)grav.y();
-    data.grav.z = (float)grav.z();
+    data.grav.x.value = (float)grav.x();
+    data.grav.y.value = (float)grav.y();
+    data.grav.z.value = (float)grav.z();
     // euler
     euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
-    data.euler.x = (float)euler.x();
-    data.euler.y = (float)euler.y();
-    data.euler.z = (float)euler.z();
+    data.euler.x.value = (float)euler.x();
+    data.euler.y.value = (float)euler.y();
+    data.euler.z.value = (float)euler.z();
     // mag
     mag = bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
-    data.mag.x = (float)mag.x();
-    data.mag.y = (float)mag.y();
-    data.mag.z = (float)mag.z();
+    data.mag.x.value = (float)mag.x();
+    data.mag.y.value = (float)mag.y();
+    data.mag.z.value = (float)mag.z();
     // gyro
     gyro = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
-    data.gyro.x = (float)gyro.x();
-    data.gyro.y = (float)gyro.y();
-    data.gyro.z = (float)gyro.z();
+    data.gyro.x.value = (float)gyro.x();
+    data.gyro.y.value = (float)gyro.y();
+    data.gyro.z.value = (float)gyro.z();
 }
 
 void displaySensorOffsets(const adafruit_bno055_offsets_t &calibData) {
@@ -247,52 +203,52 @@ void setup() {
     xTaskCreatePinnedToCore(Core1a, "Core1a", 4096, NULL, 1, &thp[1], 1);
 }
 
-void sendFloat(int id, float data) {
-    uBytes data_;
-    data_.f = data;
-    if (id == MY_ID) {
-        CAN.beginPacket(MY_ID);
-    } else {
-        CAN.beginExtendedPacket(id);
-    }
-    CAN.write(data_.b, 4);
-    CAN.endPacket();
-}
+// void sendFloat(int id, float data) {
+//     uBytes data_;
+//     data_.f = data;
+//     if (id == MY_ID) {
+//         CAN.beginPacket(MY_ID);
+//     } else {
+//         CAN.beginExtendedPacket(id);
+//     }
+//     CAN.write(data_.b, 4);
+//     CAN.endPacket();
+// }
 
-void sendUint32(int id, uint32_t data) {
-    uBytes data_;
-    data_.i = data;
-    if (id == MY_ID) {
-        CAN.beginPacket(MY_ID);
-    } else {
-        CAN.beginExtendedPacket(id);
-    }
-    CAN.write(data_.b, 4);
-    CAN.endPacket();
-}
+// void sendUint32(int id, uint32_t data) {
+//     uBytes data_;
+//     data_.i = data;
+//     if (id == MY_ID) {
+//         CAN.beginPacket(MY_ID);
+//     } else {
+//         CAN.beginExtendedPacket(id);
+//     }
+//     CAN.write(data_.b, 4);
+//     CAN.endPacket();
+// }
 
 void sendData() {
-    sendFloat(MY_ID, data.temp);
-    sendUint32(MY_ID + 1, data.pressure);
-    sendFloat(MY_ID + 2, data.grav.x);
-    sendFloat(MY_ID + 3, data.grav.y);
-    sendFloat(MY_ID + 4, data.grav.z);
-    sendFloat(MY_ID + 5, data.accel.x);
-    sendFloat(MY_ID + 6, data.accel.y);
-    sendFloat(MY_ID + 7, data.accel.z);
-    sendFloat(MY_ID + 8, data.mag.x);
-    sendFloat(MY_ID + 9, data.mag.y);
-    sendFloat(MY_ID + 10, data.mag.z);
-    sendFloat(MY_ID + 11, data.euler.x);
-    sendFloat(MY_ID + 12, data.euler.y);
-    sendFloat(MY_ID + 13, data.euler.z);
-    sendFloat(MY_ID + 14, data.quat.w);
-    sendFloat(MY_ID + 15, data.quat.x);
-    sendFloat(MY_ID + 16, data.quat.y);
-    sendFloat(MY_ID + 17, data.quat.z);
-    sendFloat(MY_ID + 18, data.gyro.x);
-    sendFloat(MY_ID + 19, data.gyro.y);
-    sendFloat(MY_ID + 20, data.gyro.z);
+    // sendFloat(MY_ID, data.temp);
+    // sendUint32(MY_ID + 1, data.pressプレス);
+    // sendFloat(MY_ID + 2, data.grav.x);
+    // sendFloat(MY_ID + 3, data.grav.y);
+    // sendFloat(MY_ID + 4, data.grav.z);
+    // sendFloat(MY_ID + 5, data.accel.x);
+    // sendFloat(MY_ID + 6, data.accel.y);
+    // sendFloat(MY_ID + 7, data.accel.z);
+    // sendFloat(MY_ID + 8, data.mag.x);
+    // sendFloat(MY_ID + 9, data.mag.y);
+    // sendFloat(MY_ID + 10, data.mag.z);
+    // sendFloat(MY_ID + 11, data.euler.x);
+    // sendFloat(MY_ID + 12, data.euler.y);
+    // sendFloat(MY_ID + 13, data.euler.z);
+    // sendFloat(MY_ID + 14, data.quat.w);
+    // sendFloat(MY_ID + 15, data.quat.x);
+    // sendFloat(MY_ID + 16, data.quat.y);
+    // sendFloat(MY_ID + 17, data.quat.z);
+    // sendFloat(MY_ID + 18, data.gyro.x);
+    // sendFloat(MY_ID + 19, data.gyro.y);
+    // sendFloat(MY_ID + 20, data.gyro.z);
 }
 
 void loop() {
@@ -343,8 +299,8 @@ void loop() {
             SerialBT.printf("QUAT:%.4f\t,%.4f\t,%.4f\t,%.4f\r\n", data.quat.w, data.quat.x, data.quat.y, data.quat.z);
             break;
         case 'W':
-            Serial.printf("WP,%d,WT,%.2f\r\n", data.pressure, data.temp);
-            SerialBT.printf("WP,%d,WT,%.2f\r\n", data.pressure, data.temp);
+            Serial.printf("WP,%d,WT,%.2f\r\n", data.press, data.temp);
+            SerialBT.printf("WP,%d,WT,%.2f\r\n", data.press, data.temp);
             break;
         case 'Z':
         default:
@@ -354,7 +310,7 @@ void loop() {
             Serial.printf("MAG:%.4f\t,%.4f\t,%.4f\r\n", data.mag.x, data.mag.y, data.mag.z);
             Serial.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.euler.x, data.euler.y, data.euler.z);
             Serial.printf("QUAT:%.4f\t,%.4f\t,%.4f\t,%.4f\r\n", data.quat.w, data.quat.x, data.quat.y, data.quat.z);
-            Serial.printf("WP,%d,WT,%.2f\r\n", data.pressure, data.temp);
+            Serial.printf("WP,%d,WT,%.2f\r\n", data.press, data.temp);
 
             SerialBT.printf("ACC:%.4f\t,%.4f\t,%.4f\r\n", data.accel.x, data.accel.y, data.accel.z);
             SerialBT.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.euler.x, data.euler.y, data.euler.z);
@@ -362,7 +318,7 @@ void loop() {
             SerialBT.printf("MAG:%.4f\t,%.4f\t,%.4f\r\n", data.mag.x, data.mag.y, data.mag.z);
             SerialBT.printf("EUR:%.4f\t,%.4f\t,%.4f\r\n", data.euler.x, data.euler.y, data.euler.z);
             SerialBT.printf("QUAT:%.4f\t,%.4f\t,%.4f\t,%.4f\r\n", data.quat.w, data.quat.x, data.quat.y, data.quat.z);
-            SerialBT.printf("WP,%d,WT,%.2f\r\n", data.pressure, data.temp);
+            SerialBT.printf("WP,%d,WT,%.2f\r\n", data.press, data.temp);
             break;
         }
         Serial.print("\033[2J");
