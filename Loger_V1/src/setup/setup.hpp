@@ -6,6 +6,7 @@
 #include "pinDefs.hpp"
 #include <./systems/systemManager.hpp>
 #include <./sensorAPI/sensors.hpp>
+
 #include <systems/can/canSender.hpp>
 #include <BluetoothSerial.h>
 
@@ -16,4 +17,8 @@
 #include <OneWire.h>
 #include <Wire.h>
 
+BluetoothSerial SerialBT;
+canSender canSender(1000E3, &SerialBT);
+sensors sensors(&SerialBT);
+systemManager systemManager(HOSTNAME, MY_ID, &SerialBT);
 #endif

@@ -1,6 +1,7 @@
 #include "sensors.hpp"
 
-Sensors::Sensors() : bno(55, 0x28) {
+sensors::sensors(BluetoothSerial *_SerialBT) : bno(55, 0x28) {
+    SerialBT = _SerialBT;
     xQueue_1 = xQueueCreate(1, sizeof(sensor1_t));
     oneWire = OneWire(ONE_WIRE_BUS);
     waterTemp = DallasTemperature(&oneWire);
@@ -48,7 +49,7 @@ Sensors::Sensors() : bno(55, 0x28) {
     }
 }
 
-void Sensors::Core1a(void *args) {
+void sensors::Core1a(void *args) {
     float tmp;
     while (1) {
         waterTemp.requestTemperatures();
@@ -58,7 +59,7 @@ void Sensors::Core1a(void *args) {
 }
 
 // task2 (Core0) : put water temperature to global variable
-void Sensors::Core0a(void *args) {
+void sensors::Core0a(void *args) {
     float tmp = 0;
     while (1) {
         // wait for queue to be filled
@@ -68,7 +69,7 @@ void Sensors::Core0a(void *args) {
     }
 }
 
-void Sensors::displaySensorOffsets(const adafruit_bno055_offsets_t &calibData) {
+void sensors::displaySensorOffsets(const adafruit_bno055_offsets_t &calibData) {
     Serial.printf("Accelerometer:%d %d %d\n", calibData.accel_offset_x, calibData.accel_offset_y, calibData.accel_offset_z);
     Serial.printf("Gyro:%d %d %d\n", calibData.gyro_offset_x, calibData.gyro_offset_y, calibData.gyro_offset_z);
     Serial.printf("Mag:%d %d %d\n", calibData.mag_offset_x, calibData.mag_offset_y, calibData.mag_offset_z);
@@ -76,7 +77,7 @@ void Sensors::displaySensorOffsets(const adafruit_bno055_offsets_t &calibData) {
     Serial.printf("Mag Radius:%d\n\n", calibData.mag_radius);
 }
 
-void Sensors::imuCalib() {
+void sensors::imuCalib() {
     if (!bno.isFullyCalibrated()) {
         uint8_t s, g, a, m = 0;
         bno.getCalibration(&s, &g, &a, &m);

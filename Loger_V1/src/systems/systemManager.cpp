@@ -1,6 +1,6 @@
 #include "systemManager.hpp"
 
-system::system(char *name, int id, BluetoothSerial *_SerialBT) {
+systemManager::systemManager(char *name, int id, BluetoothSerial *_SerialBT) {
     SerialBT = _SerialBT;
     this->name = name;
     this->id = id;
@@ -16,16 +16,16 @@ system::system(char *name, int id, BluetoothSerial *_SerialBT) {
     mode = 'M';
 }
 
-void system::setMode(char mode) {
+void systemManager::setMode(char mode) {
     this->mode = mode;
 }
 
-void system::addMode(Mode_t mode) {
+void systemManager::addMode(Mode_t mode) {
     this->modes[modeQty] = mode;
     modeQty++;
 }
 
-void system::checkMode() {
+void systemManager::checkMode() {
     uint16_t serialAvailable = Serial.available();
     uint16_t serialBTAvailable = SerialBT->available();
     modePrev = mode;
@@ -46,7 +46,7 @@ void system::checkMode() {
     }
 }
 
-uint8_t system::checkModeMatch(char &m) {
+uint8_t systemManager::checkModeMatch(char &m) {
     for (size_t i = 0; i < modeQty; i++) {
         if (modes[i].modeLetter == m) {
             return i;
@@ -55,7 +55,7 @@ uint8_t system::checkModeMatch(char &m) {
     return MODE_UNMATCH;
 }
 
-void system::run() {
+void systemManager::run() {
     runningModeIndex = checkModeMatch(mode);
     if (runningModeIndex != MODE_UNMATCH) {
         modeRunning = modes[runningModeIndex];

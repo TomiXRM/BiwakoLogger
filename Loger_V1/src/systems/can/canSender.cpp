@@ -18,7 +18,7 @@ canSender::canSender(long canBaud, BluetoothSerial *_SerialBT) {
 }
 
 void canSender::baud(long canBaud) {
-    CAN.begin(canBaud)
+    CAN.begin(canBaud);
 }
 
 void canSender::sendSensor1(sensor1_t &sensor) {
