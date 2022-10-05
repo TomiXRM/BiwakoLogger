@@ -1,11 +1,11 @@
 #include "sensors.hpp"
 
-Sensors::Sensors() : oneWire(ONE_WIRE_BUS), waterTemp(&oneWire), bno(55, 0x28) {
+Sensors::Sensors() : bno(55, 0x28) {
     xQueue_1 = xQueueCreate(1, sizeof(sensor1_t));
-    xTaskCreatePinnedToCore(Core0a, "Core0a", 10000, NULL, 1, &thp[0], 0);
-    xTaskCreatePinnedToCore(Core1a, "Core1a", 10000, NULL, 1, &thp[1], 1);
-    //     xTaskCreatePinnedToCore(this->Core0a, "Core0a", 4096, NULL, 2, &thp[0], 0);
-    //     xTaskCreatePinnedToCore(this->Core1a, "Core1a", 4096, NULL, 1, &thp[1], 1);
+    oneWire = OneWire(ONE_WIRE_BUS);
+    waterTemp = DallasTemperature(&oneWire);
+    xTaskCreatePinnedToCore(this->Core0a, "Core0a", 10000, this, 1, &thp[0], 0);
+    xTaskCreatePinnedToCore(this->Core1a, "Core1a", 10000, this, 1, &thp[1], 1);
     uint8_t c = 0;
     while (!bno.begin()) {
         c++;
@@ -18,6 +18,7 @@ Sensors::Sensors() : oneWire(ONE_WIRE_BUS), waterTemp(&oneWire), bno(55, 0x28) {
             ESP.restart();
         }
     }
+
     int eeAddress = 0;
     long bnoID;
     adafruit_bno055_offsets_t calibrationData;

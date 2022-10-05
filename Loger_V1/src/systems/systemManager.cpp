@@ -1,10 +1,11 @@
 #include "systemManager.hpp"
 
-system::system(char *name, int id) {
+system::system(char *name, int id, BluetoothSerial *_SerialBT) {
+    SerialBT = _SerialBT;
     this->name = name;
     this->id = id;
 
-    SerialBT.begin(name);
+    SerialBT->begin(name);
     tick.attach_ms(10, []() {
         digitalWrite(LED_PIN, !digitalRead(LED_PIN));
     });
@@ -24,10 +25,9 @@ void system::addMode(Mode_t mode) {
     modeQty++;
 }
 
-
 void system::checkMode() {
     uint16_t serialAvailable = Serial.available();
-    uint16_t serialBTAvailable = SerialBT.available();
+    uint16_t serialBTAvailable = SerialBT->available();
     modePrev = mode;
     if (serialAvailable > 0 || serialBTAvailable > 0) {
         char buf[256];
@@ -38,8 +38,8 @@ void system::checkMode() {
             mode = buf[0];
         } else if (serialBTAvailable > 0) {
             size_t bufSize = serialBTAvailable;
-            SerialBT.readBytesUntil('\n', buf, bufSize);
-            SerialBT.printf(" --read:%s,", buf);
+            SerialBT->readBytesUntil('\n', buf, bufSize);
+            SerialBT->printf(" --read:%s,", buf);
             mode = buf[0];
         }
         delay(500);

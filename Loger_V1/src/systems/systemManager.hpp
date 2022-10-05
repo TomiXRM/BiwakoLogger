@@ -12,10 +12,10 @@
 // using funcionPointer = void (*)();
 class system {
   public:
-    system(char *name, int id);
+    system(char *name, int id, BluetoothSerial *_SerialBT);
     void init();
     void loop();
-    BluetoothSerial SerialBT;
+    BluetoothSerial *SerialBT;
     void setMode(char mode);
     void checkMode();
     void run();

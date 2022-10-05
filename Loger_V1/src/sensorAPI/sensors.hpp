@@ -16,16 +16,16 @@ class Sensors {
     void displaySensorOffsets(const adafruit_bno055_offsets_t &calibData);
     void imuCalib();
 
-    float temp;
-    float press;
+    static float temp;
+    static float press;
 
   private:
-    void Core0a(void *args);
-    void Core1a(void *args);
-    TaskHandle_t thp[2];
-    QueueHandle_t xQueue_1;
-    OneWire oneWire;
-    DallasTemperature waterTemp;
+    static void Core0a(void *args);
+    static void Core1a(void *args);
+    static TaskHandle_t thp[2];
+    static QueueHandle_t xQueue_1;
+    static OneWire oneWire;
+    static DallasTemperature waterTemp;
 
     Adafruit_BNO055 bno;
     imu::Vector<3> accel, mag, gyro, euler, grav;
