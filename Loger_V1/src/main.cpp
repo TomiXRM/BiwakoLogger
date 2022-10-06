@@ -3,13 +3,16 @@
 
 #include "mode/m.hpp"
 
-sensor1_t sensor1(10, "temp", "℃");
 
 void setup() {
+    // initiate serial communication
     Serial.begin(2000000);
     SerialBT.begin(HOSTNAME);
 
+    // initalize modes
     systemManager.addMode(mode_m);
+
+    // setup default mode
     systemManager.setMode('M');
 }
 

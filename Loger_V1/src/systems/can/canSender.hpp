@@ -12,8 +12,8 @@ class canSender {
     canSender(long canBaud, BluetoothSerial *_SerialBT);
     void baud(long canBaud);
     void sendSensor1(sensor1_t &sensor);
-    void sendSensor3(sensors3_t &sensor);
-    void sendSensor4(sensors4_t &sensor);
+    void sendSensor3(sensor3_t &sensor);
+    void sendSensor4(sensor4_t &sensor);
 
   private:
     BluetoothSerial *SerialBT;

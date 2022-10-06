@@ -35,9 +35,9 @@ class sensor1_t {
     }
 };
 
-class sensors3_t {
+class sensor3_t {
   public:
-    sensors3_t(int id, const char *name, const char *unit)
+    sensor3_t(int id, const char *name, const char *unit)
         : x(id + 1, "X", unit),
           y(id + 2, "Y", unit),
           z(id + 3, "Z", unit) {
@@ -51,9 +51,9 @@ class sensors3_t {
     sensor1_t z;
 };
 
-class sensors4_t {
+class sensor4_t {
   public:
-    sensors4_t(int id, const char *name, const char *unit)
+    sensor4_t(int id, const char *name, const char *unit)
         : w(id + 1, "W", unit),
           x(id + 2, "X", unit),
           y(id + 3, "Y", unit),
@@ -70,7 +70,7 @@ class sensors4_t {
 };
 
 // print関数
-// void printXYZValues(sensors3_t &sensor) {
+// void printXYZValues(sensor3_t &sensor) {
 //     printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.x.name, (float)sensor.x, sensor.x.unit, sensor.x.id);
 //     printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.y.name, (float)sensor.y, sensor.y.unit, sensor.y.id);
 //     printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.z.name, (float)sensor.z, sensor.z.unit, sensor.z.id);

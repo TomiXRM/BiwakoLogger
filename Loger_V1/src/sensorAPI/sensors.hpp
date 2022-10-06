@@ -15,8 +15,8 @@ static TaskHandle_t thp[2];
 static QueueHandle_t xQueue_1;
 static OneWire oneWire;
 static DallasTemperature waterTemp;
-static float temp;
-static float press;
+static float ___temp;
+static float ___press;
 
 void Core1a(void *args) {
     float tmp;
@@ -27,14 +27,14 @@ void Core1a(void *args) {
     }
 }
 
-// task2 (Core0) : put water temperature to global variable
+// task2 (Core0) : put water___temperature to global variable
 void Core0a(void *args) {
     float tmp = 0;
     while (1) {
         // wait for queue to be filled
         xQueueReceive(xQueue_1, &tmp, portMAX_DELAY);
-        temp = tmp; // put to global variable
-        press = analogRead(PRESSURE_SENSOR_PIN);
+        ___temp = tmp; // put to global variable
+        ___press = analogRead(PRESSURE_SENSOR_PIN);
     }
 }
 

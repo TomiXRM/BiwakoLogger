@@ -1,6 +1,6 @@
 #include "systemManager.hpp"
 
-systemManager::systemManager(char *name, int id, BluetoothSerial *_SerialBT) {
+systemManager::systemManager(const char *name, int id, BluetoothSerial *_SerialBT) {
     SerialBT = _SerialBT;
     this->name = name;
     this->id = id;

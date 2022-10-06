@@ -12,7 +12,7 @@
 // using funcionPointer = void (*)();
 class systemManager {
   public:
-    systemManager(char *name, int id, BluetoothSerial *_SerialBT);
+    systemManager(const char *name, int id, BluetoothSerial *_SerialBT);
     BluetoothSerial *SerialBT;
     void setMode(char mode);
     void checkSerial();
@@ -21,7 +21,7 @@ class systemManager {
     uint8_t checkModeMatch(char &m);
 
   private:
-    char *name;
+    const char *name;
     int id;
     char mode;
     Ticker tick;

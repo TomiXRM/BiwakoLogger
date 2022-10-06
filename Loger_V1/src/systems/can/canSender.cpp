@@ -27,13 +27,13 @@ void canSender::sendSensor1(sensor1_t &sensor) {
     CAN.endPacket();
 }
 
-void canSender::sendSensor3(sensors3_t &sensor) {
+void canSender::sendSensor3(sensor3_t &sensor) {
     sendSensor1(sensor.x);
     sendSensor1(sensor.y);
     sendSensor1(sensor.z);
 }
 
-void canSender::sendSensor4(sensors4_t &sensor) {
+void canSender::sendSensor4(sensor4_t &sensor) {
     sendSensor1(sensor.w);
     sendSensor1(sensor.x);
     sendSensor1(sensor.y);
