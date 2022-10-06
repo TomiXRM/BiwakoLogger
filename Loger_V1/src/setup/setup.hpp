@@ -17,8 +17,8 @@
 #include <OneWire.h>
 #include <Wire.h>
 
-BluetoothSerial SerialBT;
-canSender canSender(1000E3, &SerialBT);
-sensors sensors(&SerialBT);
-systemManager systemManager(HOSTNAME, MY_ID, &SerialBT);
+static BluetoothSerial SerialBT;
+static canSender canSender(1000E3, &SerialBT);
+static sensors sensors(&SerialBT);
+static systemManager systemManager(HOSTNAME, MY_ID, &SerialBT);
 #endif

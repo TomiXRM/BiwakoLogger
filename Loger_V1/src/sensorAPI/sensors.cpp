@@ -5,8 +5,8 @@ sensors::sensors(BluetoothSerial *_SerialBT) : bno(55, 0x28) {
     xQueue_1 = xQueueCreate(1, sizeof(sensor1_t));
     oneWire = OneWire(ONE_WIRE_BUS);
     waterTemp = DallasTemperature(&oneWire);
-    xTaskCreatePinnedToCore(this->Core0a, "Core0a", 10000, this, 1, &thp[0], 0);
-    xTaskCreatePinnedToCore(this->Core1a, "Core1a", 10000, this, 1, &thp[1], 1);
+    xTaskCreatePinnedToCore(Core0a, "Core0a", 10000, this, 1, &thp[0], 0);
+    xTaskCreatePinnedToCore(Core1a, "Core1a", 10000, this, 1, &thp[1], 1);
     uint8_t c = 0;
     while (!bno.begin()) {
         c++;
@@ -46,26 +46,6 @@ sensors::sensors(BluetoothSerial *_SerialBT) : bno(55, 0x28) {
         Serial.println("\n\nCalibration data loaded into BNO055");
         // SerialBT.println("\n\nCalibration data loaded into BNO055");
         //  foundCalib = true;
-    }
-}
-
-void sensors::Core1a(void *args) {
-    float tmp;
-    while (1) {
-        waterTemp.requestTemperatures();
-        tmp = waterTemp.getTempCByIndex(0);
-        xQueueSend(xQueue_1, &tmp, 0);
-    }
-}
-
-// task2 (Core0) : put water temperature to global variable
-void sensors::Core0a(void *args) {
-    float tmp = 0;
-    while (1) {
-        // wait for queue to be filled
-        xQueueReceive(xQueue_1, &tmp, portMAX_DELAY);
-        temp = tmp; // put to global variable
-        press = analogRead(PRESSURE_SENSOR_PIN);
     }
 }
 

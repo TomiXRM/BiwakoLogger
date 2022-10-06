@@ -13,11 +13,9 @@
 class systemManager {
   public:
     systemManager(char *name, int id, BluetoothSerial *_SerialBT);
-    void init();
-    void loop();
     BluetoothSerial *SerialBT;
     void setMode(char mode);
-    void checkMode();
+    void checkSerial();
     void run();
     void addMode(Mode_t mode);
     uint8_t checkModeMatch(char &m);

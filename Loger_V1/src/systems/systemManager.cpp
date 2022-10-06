@@ -25,7 +25,7 @@ void systemManager::addMode(Mode_t mode) {
     modeQty++;
 }
 
-void systemManager::checkMode() {
+void systemManager::checkSerial() {
     uint16_t serialAvailable = Serial.available();
     uint16_t serialBTAvailable = SerialBT->available();
     modePrev = mode;
@@ -56,6 +56,7 @@ uint8_t systemManager::checkModeMatch(char &m) {
 }
 
 void systemManager::run() {
+    checkSerial();
     runningModeIndex = checkModeMatch(mode);
     if (runningModeIndex != MODE_UNMATCH) {
         modeRunning = modes[runningModeIndex];

@@ -5,16 +5,17 @@
 #include <./setup/pinDefs.hpp>
 #include <./setup/dataDefs.hpp>
 
-void m_before() {
+static void m_before() {
 }
 
-void m_body() {
+static void m_body() {
 }
 
-void m_after() {
+static void m_after() {
 }
 
-Mode_t mode_m = {
+static Mode_t mode_m = {
+    "MainMode",
     'M',
     m_before,
     m_body,

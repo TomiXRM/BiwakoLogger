@@ -8,6 +8,36 @@
 #include <BluetoothSerial.h>
 #include <./setup/dataDefs.hpp>
 #include <./setup/pinDefs.hpp>
+
+static void Core0a(void *args);
+static void Core1a(void *args);
+static TaskHandle_t thp[2];
+static QueueHandle_t xQueue_1;
+static OneWire oneWire;
+static DallasTemperature waterTemp;
+static float temp;
+static float press;
+
+void Core1a(void *args) {
+    float tmp;
+    while (1) {
+        waterTemp.requestTemperatures();
+        tmp = waterTemp.getTempCByIndex(0);
+        xQueueSend(xQueue_1, &tmp, 0);
+    }
+}
+
+// task2 (Core0) : put water temperature to global variable
+void Core0a(void *args) {
+    float tmp = 0;
+    while (1) {
+        // wait for queue to be filled
+        xQueueReceive(xQueue_1, &tmp, portMAX_DELAY);
+        temp = tmp; // put to global variable
+        press = analogRead(PRESSURE_SENSOR_PIN);
+    }
+}
+
 class sensors {
   public:
     sensors(BluetoothSerial *_SerialBT);
@@ -16,17 +46,7 @@ class sensors {
     void displaySensorOffsets(const adafruit_bno055_offsets_t &calibData);
     void imuCalib();
 
-    static float temp;
-    static float press;
-
   private:
-    static void Core0a(void *args);
-    static void Core1a(void *args);
-    static TaskHandle_t thp[2];
-    static QueueHandle_t xQueue_1;
-    static OneWire oneWire;
-    static DallasTemperature waterTemp;
-
     BluetoothSerial *SerialBT;
 
     Adafruit_BNO055 bno;

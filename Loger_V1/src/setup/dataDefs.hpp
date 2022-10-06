@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 typedef struct {
-    char *modeName;
+    const char *modeName;
     char modeLetter;
     void (*before)();
     void (*body)();
