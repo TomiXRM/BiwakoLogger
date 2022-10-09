@@ -90,3 +90,40 @@ void sensors::imuCalib() {
         // //mode = 'Z';
     }
 }
+
+void sensors::readIMU(sensor3_t &acc, sensor3_t &mag, sensor3_t &gyro, sensor3_t &grav, sensor3_t &euler, sensor4_t &quat) {
+    // accels
+    imu::Vector<3> _acc = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
+    acc.x = (float)_acc.x();
+    acc.y = (float)_acc.y();
+    acc.z = (float)_acc.z();
+
+    // mag
+    imu::Vector<3> _mag = bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
+    mag.x = (float)_mag.x();
+    mag.y = (float)_mag.y();
+    mag.z = (float)_mag.z();
+
+    // gyro
+    imu::Vector<3> _gyro = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
+    gyro.x = (float)_gyro.x();
+    gyro.y = (float)_gyro.y();
+    gyro.z = (float)_gyro.z();
+
+    // gravity
+    imu::Vector<3> _grav = bno.getVector(Adafruit_BNO055::VECTOR_GRAVITY);
+    grav.x = (float)_grav.x();
+    grav.y = (float)_grav.y();
+    grav.z = (float)_grav.z();
+    // euler
+    imu::Vector<3> _euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+    euler.x = (float)_euler.x();
+    euler.y = (float)_euler.y();
+    euler.z = (float)_euler.z();
+
+    imu::Quaternion _quat = bno.getQuat();
+    quat.w = (float)_quat.w();
+    quat.x = (float)_quat.x();
+    quat.y = (float)_quat.y();
+    quat.z = (float)_quat.z();
+}

@@ -41,7 +41,7 @@ void Core0a(void *args) {
 class sensors {
   public:
     sensors(BluetoothSerial *_SerialBT);
-    void read(uint8_t sensor);
+    void readIMU(sensor3_t &acc, sensor3_t &mag, sensor3_t &gyro, sensor3_t &grav, sensor3_t &euler, sensor4_t &quat);
 
     void displaySensorOffsets(const adafruit_bno055_offsets_t &calibData);
     void imuCalib();
@@ -50,7 +50,6 @@ class sensors {
     BluetoothSerial *SerialBT;
 
     Adafruit_BNO055 bno;
-    imu::Vector<3> accel, mag, gyro, euler, grav;
 };
 
 #endif
