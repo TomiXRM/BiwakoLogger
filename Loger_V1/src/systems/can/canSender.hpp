@@ -9,7 +9,8 @@
 
 class canSender {
   public:
-    canSender(long canBaud, BluetoothSerial *_SerialBT);
+    canSender(BluetoothSerial *_SerialBT);
+    void begin(long canBaud);
     void baud(long canBaud);
     void sendSensor1(sensor1_t &sensor);
     void sendSensor3(sensor3_t &sensor);

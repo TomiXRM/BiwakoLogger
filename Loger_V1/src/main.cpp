@@ -11,6 +11,7 @@ void setup() {
     Serial.begin(115200);
     SerialBT.begin(HOSTNAME);
     sysMan.begin();
+    canSender.begin(1000E3);
     // sensors = Sensors(&SerialBT);
 }
 

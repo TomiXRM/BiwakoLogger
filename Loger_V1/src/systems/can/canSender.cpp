@@ -1,7 +1,10 @@
 #include "canSender.hpp"
 
-canSender::canSender(long canBaud, BluetoothSerial *_SerialBT) {
+canSender::canSender(BluetoothSerial *_SerialBT) {
     SerialBT = _SerialBT;
+}
+
+void canSender::begin(long canBaud) {
     CAN.setPins(25, 26);
     uint8_t c = 0;
     while (!CAN.begin(canBaud)) {

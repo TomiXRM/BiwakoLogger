@@ -20,4 +20,5 @@
 static BluetoothSerial SerialBT;
 Sensors sensors(&SerialBT);
 systemManager sysMan(HOSTNAME, MY_ID, &SerialBT);
+canSender canSender(&SerialBT);
 #endif
