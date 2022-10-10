@@ -18,7 +18,4 @@
 #include <Wire.h>
 
 static BluetoothSerial SerialBT;
-static canSender canSender(1000E3, &SerialBT);
-static sensors sensors(&SerialBT);
-static systemManager systemManager(HOSTNAME, MY_ID, &SerialBT);
 #endif
