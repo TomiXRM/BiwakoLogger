@@ -10,6 +10,7 @@ void setup() {
     sensors.begin();
     Serial.begin(115200);
     SerialBT.begin(HOSTNAME);
+    sysMan.begin();
     // sensors = Sensors(&SerialBT);
 }
 

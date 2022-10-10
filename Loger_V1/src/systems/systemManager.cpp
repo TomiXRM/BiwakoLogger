@@ -4,9 +4,11 @@ systemManager::systemManager(const char *name, int id, BluetoothSerial *_SerialB
     SerialBT = _SerialBT;
     this->name = name;
     this->id = id;
+}
 
-    SerialBT->begin(name);
-    tick.attach_ms(10, []() {
+void systemManager::begin() {
+    pinMode(LED_PIN, OUTPUT);
+    tick.attach_ms(650, []() {
         digitalWrite(LED_PIN, !digitalRead(LED_PIN));
     });
 

@@ -13,7 +13,7 @@
 class systemManager {
   public:
     systemManager(const char *name, int id, BluetoothSerial *_SerialBT);
-    BluetoothSerial *SerialBT;
+    void begin();
     void setMode(char mode);
     void checkSerial();
     void run();
@@ -32,5 +32,6 @@ class systemManager {
     Mode_t modePrevRunning;
     uint8_t runningModeIndex;
     uint8_t runningModeIndexPrev;
+    BluetoothSerial *SerialBT;
 };
 #endif
