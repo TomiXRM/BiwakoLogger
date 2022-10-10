@@ -49,6 +49,9 @@ void systemManager::checkSerial() {
 }
 
 uint8_t systemManager::checkModeMatch(char &m) {
+    if (modeQty == 0) {
+        return 0;
+    }
     for (size_t i = 0; i < modeQty; i++) {
         if (modes[i].modeLetter == m) {
             return i;
@@ -60,6 +63,11 @@ uint8_t systemManager::checkModeMatch(char &m) {
 void systemManager::run() {
     checkSerial();
     runningModeIndex = checkModeMatch(mode);
+    if (modeQty == 0) {
+        Serial.println("No mode added");
+        return;
+    }
+    // Serial.printf("ModeQty:%d mode:%c, runningModeIndex:%d, modePrev:%c, mode:%c", modeQty, mode, runningModeIndex, modePrev, mode);
     if (runningModeIndex != MODE_UNMATCH) {
         modeRunning = modes[runningModeIndex];
         modePrevRunning = modes[runningModeIndexPrev];

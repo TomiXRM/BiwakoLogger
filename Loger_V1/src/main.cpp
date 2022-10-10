@@ -1,9 +1,7 @@
 #include "Arduino.h"
 #include "./setup/setup.hpp"
 
-// #include "mode/m.hpp"
-
-bool tl = 0;
+#include "mode/m.hpp"
 
 void setup() {
     // initiate serial communication
@@ -12,11 +10,10 @@ void setup() {
     SerialBT.begin(HOSTNAME);
     sysMan.begin();
     canSender.begin(1000E3);
-    // sensors = Sensors(&SerialBT);
+
+    sysMan.addMode(mode_m);
 }
 
 void loop() {
-    Serial.println("loop");
-    sensors.printTest();
-    delay(100);
+    sysMan.run();
 }
