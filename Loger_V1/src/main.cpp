@@ -3,13 +3,18 @@
 
 // #include "mode/m.hpp"
 
+bool tl = 0;
+
 void setup() {
     // initiate serial communication
-    Serial.begin(2000000);
+    sensors.begin();
+    Serial.begin(115200);
     SerialBT.begin(HOSTNAME);
+    // sensors = Sensors(&SerialBT);
 }
 
 void loop() {
     Serial.println("loop");
-    delay(1000);
+    sensors.printTest();
+    delay(100);
 }

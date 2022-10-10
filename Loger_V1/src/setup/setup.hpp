@@ -4,11 +4,11 @@
 #include <Arduino.h>
 #include "dataDefs.hpp"
 #include "pinDefs.hpp"
-#include <./systems/systemManager.hpp>
-#include <./sensorAPI/sensors.hpp>
+#include "./systems/systemManager.hpp"
+#include "./sensorAPI/sensors.hpp"
 
-#include <systems/can/canSender.hpp>
-#include <BluetoothSerial.h>
+#include "systems/can/canSender.hpp"
+#include "BluetoothSerial.h"
 
 #define HOSTNAME "ESP32-1"
 #define MY_ID 0x01
@@ -18,4 +18,5 @@
 #include <Wire.h>
 
 static BluetoothSerial SerialBT;
+Sensors sensors(&SerialBT);
 #endif

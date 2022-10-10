@@ -1,7 +1,13 @@
 #include "sensors.hpp"
 
-sensors::sensors(BluetoothSerial *_SerialBT) : bno(55, 0x28) {
+// Sensors::Sensors() : bno(55, 0x28) {
+// }
+
+Sensors::Sensors(BluetoothSerial *_SerialBT) : bno(55, 0x28) {
     SerialBT = _SerialBT;
+}
+
+void Sensors::begin() {
     xQueue_1 = xQueueCreate(1, sizeof(sensor1_t));
     oneWire = OneWire(ONE_WIRE_BUS);
     waterTemp = DallasTemperature(&oneWire);
@@ -49,7 +55,13 @@ sensors::sensors(BluetoothSerial *_SerialBT) : bno(55, 0x28) {
     }
 }
 
-void sensors::displaySensorOffsets(const adafruit_bno055_offsets_t &calibData) {
+// void Sensors::setBluetoothSerial(BluetoothSerial *_SerialBT) {
+//     SerialBT = _SerialBT;
+//     SerialBT->print("Bluetooth Serial is set");
+//     Serial.println("Bluetooth Serial is set");
+// }
+
+void Sensors::displaySensorOffsets(const adafruit_bno055_offsets_t &calibData) {
     Serial.printf("Accelerometer:%d %d %d\n", calibData.accel_offset_x, calibData.accel_offset_y, calibData.accel_offset_z);
     Serial.printf("Gyro:%d %d %d\n", calibData.gyro_offset_x, calibData.gyro_offset_y, calibData.gyro_offset_z);
     Serial.printf("Mag:%d %d %d\n", calibData.mag_offset_x, calibData.mag_offset_y, calibData.mag_offset_z);
@@ -57,7 +69,7 @@ void sensors::displaySensorOffsets(const adafruit_bno055_offsets_t &calibData) {
     Serial.printf("Mag Radius:%d\n\n", calibData.mag_radius);
 }
 
-void sensors::imuCalib() {
+void Sensors::imuCalib() {
     if (!bno.isFullyCalibrated()) {
         uint8_t s, g, a, m = 0;
         bno.getCalibration(&s, &g, &a, &m);
@@ -91,7 +103,7 @@ void sensors::imuCalib() {
     }
 }
 
-void sensors::readIMU(sensor3_t &acc, sensor3_t &mag, sensor3_t &gyro, sensor3_t &grav, sensor3_t &euler, sensor4_t &quat) {
+void Sensors::readIMU(sensor3_t &acc, sensor3_t &mag, sensor3_t &gyro, sensor3_t &grav, sensor3_t &euler, sensor4_t &quat) {
     // accels
     imu::Vector<3> _acc = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
     acc.x = (float)_acc.x();
