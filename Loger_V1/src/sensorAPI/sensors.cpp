@@ -1,4 +1,4 @@
-#include "sensors.hpp"
+#include "Sensors.hpp"
 
 // Sensors::Sensors() : bno(55, 0x28) {
 // }
@@ -8,7 +8,7 @@ Sensors::Sensors(BluetoothSerial *_SerialBT) : bno(55, 0x28) {
 }
 
 void Sensors::begin() {
-    xQueue_1 = xQueueCreate(1, sizeof(sensor1_t));
+    xQueue_1 = xQueueCreate(1, sizeof(Sensor1_t));
     oneWire = OneWire(ONE_WIRE_BUS);
     waterTemp = DallasTemperature(&oneWire);
     xTaskCreatePinnedToCore(Core0a, "Core0a", 10000, this, 1, &thp[0], 0);
@@ -29,17 +29,17 @@ void Sensors::begin() {
     int eeAddress = 0;
     long bnoID;
     adafruit_bno055_offsets_t calibrationData;
-    sensor_t sensor;
+    sensor_t Sensor;
     EEPROM.begin(64);
     EEPROM.get(eeAddress, bnoID);
-    bno.getSensor(&sensor);
-    if (bnoID != sensor.sensor_id) {
-        Serial.println("\nNo Calibration Data for this sensor exists in EEPROM");
-        // SerialBT.println("\nNo Calibration Data for this sensor exists in EEPROM");
+    bno.getSensor(&Sensor);
+    if (bnoID != Sensor.sensor_id) {
+        Serial.println("\nNo Calibration Data for this Sensor exists in EEPROM");
+        // SerialBT.println("\nNo Calibration Data for this Sensor exists in EEPROM");
         delay(500);
     } else {
-        Serial.println("\nFound Calibration for this sensor in EEPROM.");
-        // SerialBT.println("\nFound Calibration for this sensor in EEPROM.");
+        Serial.println("\nFound Calibration for this Sensor in EEPROM.");
+        // SerialBT.println("\nFound Calibration for this Sensor in EEPROM.");
         eeAddress += sizeof(long);
         EEPROM.get(eeAddress, calibrationData);
 
@@ -91,9 +91,9 @@ void Sensors::imuCalib() {
         bno.getSensorOffsets(newCalib);
         displaySensorOffsets(newCalib);
         int eeAddress = 0;
-        sensor_t sensor;
-        bno.getSensor(&sensor);
-        long bnoID = sensor.sensor_id;
+        sensor_t Sensor;
+        bno.getSensor(&Sensor);
+        long bnoID = Sensor.sensor_id;
         EEPROM.put(eeAddress, bnoID);
         eeAddress += sizeof(long);
         EEPROM.put(eeAddress, newCalib);
@@ -103,7 +103,7 @@ void Sensors::imuCalib() {
     }
 }
 
-void Sensors::readIMU(sensor3_t &acc, sensor3_t &mag, sensor3_t &gyro, sensor3_t &grav, sensor3_t &euler, sensor4_t &quat) {
+void Sensors::readIMU(Sensor3_t &acc, Sensor3_t &mag, Sensor3_t &gyro, Sensor3_t &grav, Sensor3_t &euler, Sensor4_t &quat) {
     // accels
     imu::Vector<3> _acc = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
     acc.x = (float)_acc.x();

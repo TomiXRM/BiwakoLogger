@@ -9,7 +9,10 @@
             "cstring": "cpp",
             "cstdlib": "cpp",
             "cstdio": "cpp",
-            "cstdint": "cpp"
+            "cstdint": "cpp",
+            "*.tcc": "cpp",
+            "system_error": "cpp",
+            "typeinfo": "cpp"
       },
       "cmake.sourceDirectory": "${workspaceFolder}/lib/Adafruit_BusIO-master"
 }

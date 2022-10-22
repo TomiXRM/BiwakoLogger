@@ -7,14 +7,14 @@
 #include <BluetoothSerial.h>
 #include <CAN.h>
 
-class canSender {
+class CanSender {
   public:
-    canSender(BluetoothSerial *_SerialBT);
+    CanSender(BluetoothSerial *_SerialBT);
     void begin(long canBaud);
     void baud(long canBaud);
-    void sendSensor1(sensor1_t &sensor);
-    void sendSensor3(sensor3_t &sensor);
-    void sendSensor4(sensor4_t &sensor);
+    void sendSensor1(Sensor1_t &sensor);
+    void sendSensor3(Sensor3_t &sensor);
+    void sendSensor4(Sensor4_t &sensor);
 
   private:
     BluetoothSerial *SerialBT;

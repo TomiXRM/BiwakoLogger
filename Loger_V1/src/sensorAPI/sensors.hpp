@@ -47,7 +47,7 @@ class Sensors {
     void printTest() {
         SerialBT->println("Sensors class is working");
     }
-    void readIMU(sensor3_t &acc, sensor3_t &mag, sensor3_t &gyro, sensor3_t &grav, sensor3_t &euler, sensor4_t &quat);
+    void readIMU(Sensor3_t &acc, Sensor3_t &mag, Sensor3_t &gyro, Sensor3_t &grav, Sensor3_t &euler, Sensor4_t &quat);
 
     void displaySensorOffsets(const adafruit_bno055_offsets_t &calibData);
     void imuCalib();

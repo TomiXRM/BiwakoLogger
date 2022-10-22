@@ -4,9 +4,9 @@
 #include <Arduino.h>
 #include "dataDefs.hpp"
 #include "pinDefs.hpp"
-#include "./systems/systemManager.hpp"
-#include "./sensorAPI/sensors.hpp"
-#include "systems/can/canSender.hpp"
+#include "./systems/System.hpp"
+#include "./sensorAPI/Sensors.hpp"
+#include "systems/can/CanSender.hpp"
 #include "time.h"
 
 #define HOSTNAME "ESP32-1"
@@ -19,6 +19,6 @@
 
 static BluetoothSerial SerialBT;
 static Sensors sensors(&SerialBT);
-static systemManager sysMan(HOSTNAME, MY_ID, &SerialBT);
-static canSender canSender(&SerialBT);
+static System sysManager(HOSTNAME, MY_ID, &SerialBT);
+static CanSender canSender(&SerialBT);
 #endif

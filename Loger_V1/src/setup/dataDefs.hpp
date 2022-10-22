@@ -10,9 +10,9 @@ typedef struct {
     void (*after)();
 } Mode_t;
 
-class sensor1_t {
+class Sensor1_t {
   public:
-    sensor1_t(int id, const char *name, const char *unit) {
+    Sensor1_t(int id, const char *name, const char *unit) {
         this->id = id;
         this->name = name;
         this->unit = unit;
@@ -26,7 +26,7 @@ class sensor1_t {
     const char *name;
     const char *unit;
 
-    sensor1_t &operator=(float val) {
+    Sensor1_t &operator=(float val) {
         this->f = val;
         return *this;
     }
@@ -43,9 +43,9 @@ class sensor1_t {
     }
 };
 
-class sensor3_t {
+class Sensor3_t {
   public:
-    sensor3_t(int id, const char *name, const char *unit)
+    Sensor3_t(int id, const char *name, const char *unit)
         : x(id + 1, "X", unit),
           y(id + 2, "Y", unit),
           z(id + 3, "Z", unit) {
@@ -54,9 +54,9 @@ class sensor3_t {
     }
     int id;
     const char *name;
-    sensor1_t x;
-    sensor1_t y;
-    sensor1_t z;
+    Sensor1_t x;
+    Sensor1_t y;
+    Sensor1_t z;
 
     void print() {
         Serial.printf("%sX:%.2f[%s] \t id:%d\n", this->name, this->x.f, this->x.unit, this->x.id);
@@ -65,9 +65,9 @@ class sensor3_t {
     }
 };
 
-class sensor4_t {
+class Sensor4_t {
   public:
-    sensor4_t(int id, const char *name, const char *unit)
+    Sensor4_t(int id, const char *name, const char *unit)
         : w(id + 1, "W", unit),
           x(id + 2, "X", unit),
           y(id + 3, "Y", unit),
@@ -77,10 +77,10 @@ class sensor4_t {
     }
     int id;
     const char *name;
-    sensor1_t w;
-    sensor1_t x;
-    sensor1_t y;
-    sensor1_t z;
+    Sensor1_t w;
+    Sensor1_t x;
+    Sensor1_t y;
+    Sensor1_t z;
 
     void print() {
         Serial.printf("%sW:%.2f[%s] \t id:%d\n", this->name, this->w.f, this->w.unit, this->w.id);

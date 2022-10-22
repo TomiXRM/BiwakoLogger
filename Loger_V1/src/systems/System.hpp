@@ -10,9 +10,9 @@
 #include <./setup/dataDefs.hpp>
 #define MODE_UNMATCH -1
 // using funcionPointer = void (*)();
-class systemManager {
+class System {
   public:
-    systemManager(const char *name, int id, BluetoothSerial *_SerialBT);
+    System(const char *name, int id, BluetoothSerial *_SerialBT);
     void begin();
     void setMode(char mode);
     void checkSerial();

@@ -1,12 +1,12 @@
-#include "systemManager.hpp"
+#include "system.hpp"
 
-systemManager::systemManager(const char *name, int id, BluetoothSerial *_SerialBT) {
+System::System(const char *name, int id, BluetoothSerial *_SerialBT) {
     SerialBT = _SerialBT;
     this->name = name;
     this->id = id;
 }
 
-void systemManager::begin() {
+void System::begin() {
     pinMode(LED_PIN, OUTPUT);
     tick.attach_ms(650, []() {
         digitalWrite(LED_PIN, !digitalRead(LED_PIN));
@@ -18,16 +18,16 @@ void systemManager::begin() {
     mode = 'M';
 }
 
-void systemManager::setMode(char mode) {
+void System::setMode(char mode) {
     this->mode = mode;
 }
 
-void systemManager::addMode(Mode_t mode) {
+void System::addMode(Mode_t mode) {
     this->modes[modeQty] = mode;
     modeQty++;
 }
 
-void systemManager::checkSerial() {
+void System::checkSerial() {
     uint16_t serialAvailable = Serial.available();
     uint16_t serialBTAvailable = SerialBT->available();
     modePrev = mode;
@@ -48,7 +48,7 @@ void systemManager::checkSerial() {
     }
 }
 
-uint8_t systemManager::checkModeMatch(char &m) {
+uint8_t System::checkModeMatch(char &m) {
     if (modeQty == 0) {
         return 0;
     }
@@ -60,7 +60,7 @@ uint8_t systemManager::checkModeMatch(char &m) {
     return MODE_UNMATCH;
 }
 
-void systemManager::run() {
+void System::run() {
     checkSerial();
     runningModeIndex = checkModeMatch(mode);
     if (modeQty == 0) {

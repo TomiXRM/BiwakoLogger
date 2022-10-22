@@ -6,28 +6,40 @@
 #include "./setup/dataDefs.hpp"
 #include "./setup/setup.hpp"
 
-sensor1_t temp(10, "temp", "℃");
-sensor1_t press(20, "press", "Pa");
-sensor3_t acc(30, "acc", "m/s^2");
-sensor3_t mag(40, "mag", "uT");
-sensor3_t gyro(50, "gyro", "rad/s");
-sensor3_t grav(60, "grav", "m/s^2");
-sensor3_t euler(70, "euler", "rad");
-sensor4_t quat(80, "quat", "q");
+Sensor1_t temp(10, "temp", "℃");
+Sensor1_t press(20, "press", "Pa");
+Sensor3_t acc(30, "acc", "m/s^2");
+Sensor3_t mag(40, "mag", "uT");
+Sensor3_t gyro(50, "gyro", "rad/s");
+Sensor3_t grav(60, "grav", "m/s^2");
+Sensor3_t euler(70, "euler", "rad");
+Sensor4_t quat(80, "quat", "q");
 
 timer ttt;
 
 void print() {
+    temp.print();
+    press.print();
     acc.print();
     mag.print();
     gyro.print();
     grav.print();
     euler.print();
     quat.print();
-    Serial.println(ttt.read_ms());
+
     Serial.print("\033[H");
     Serial.print("\033[2J");
-    ttt.reset();
+}
+
+void canSend() {
+    canSender.sendSensor1(temp);
+    canSender.sendSensor1(press);
+    canSender.sendSensor3(acc);
+    canSender.sendSensor3(mag);
+    canSender.sendSensor3(gyro);
+    canSender.sendSensor3(grav);
+    canSender.sendSensor3(euler);
+    canSender.sendSensor4(quat);
 }
 
 static void m_before() {
@@ -36,11 +48,14 @@ static void m_before() {
 
 static void m_body() {
     // Serial.println("m_body");
+    ttt.reset();
     sensors.readIMU(acc, mag, gyro, grav, euler, quat);
     temp.f = ___temp;
     press.f = ___press;
 
     print();
+    canSend();
+    Serial.println(ttt.read_ms());
 }
 
 static void m_after() {

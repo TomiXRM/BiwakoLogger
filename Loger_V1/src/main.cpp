@@ -2,18 +2,26 @@
 #include "./setup/setup.hpp"
 
 #include "mode/m.hpp"
+#include "mode/calibrationMode.hpp"
 
 void setup() {
-    // initiate serial communication
-    sensors.begin();
+    // initialize serial communication
     Serial.begin(115200);
     SerialBT.begin(HOSTNAME);
-    sysMan.begin();
+
+    // initialize CAN communication
     canSender.begin(1000E3);
 
-    sysMan.addMode(mode_m);
+    // initialize system Manager
+    sysManager.begin();
+
+    // initialize sensors
+    sensors.begin();
+    // add modes
+    sysManager.addMode(mode_m);
+    sysManager.addMode(mode_c);
 }
 
 void loop() {
-    sysMan.run();
+    sysManager.run();
 }
