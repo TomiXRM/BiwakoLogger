@@ -1,0 +1,14 @@
+{
+      "files.associations": {
+            "random": "cpp",
+            "array": "cpp",
+            "functional": "cpp",
+            "tuple": "cpp",
+            "type_traits": "cpp",
+            "utility": "cpp",
+            "cstring": "cpp",
+            "cstdlib": "cpp",
+            "cstdio": "cpp",
+            "cstdint": "cpp"
+      }
+}
