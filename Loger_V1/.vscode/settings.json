@@ -10,5 +10,6 @@
             "cstdlib": "cpp",
             "cstdio": "cpp",
             "cstdint": "cpp"
-      }
+      },
+      "cmake.sourceDirectory": "${workspaceFolder}/lib/Adafruit_BusIO-master"
 }

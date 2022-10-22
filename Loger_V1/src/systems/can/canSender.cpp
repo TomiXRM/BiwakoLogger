@@ -26,7 +26,7 @@ void canSender::baud(long canBaud) {
 
 void canSender::sendSensor1(sensor1_t &sensor) {
     CAN.beginPacket(sensor.id);
-    CAN.write(sensor.value.u8, 4);
+    CAN.write(sensor.u8, 4);
     CAN.endPacket();
 }
 

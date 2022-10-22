@@ -21,17 +21,25 @@ class sensor1_t {
         float f;
         uint32_t i;
         uint8_t u8[4];
-    } value;
+    };
     int id;
     const char *name;
     const char *unit;
 
     sensor1_t &operator=(float val) {
-        this->value.f = val;
+        this->f = val;
         return *this;
     }
     operator float() {
-        return this->value.f;
+        return this->f;
+    }
+
+    void print() {
+        Serial.printf("%s:%.2f[%s] \t id:%d\n", this->name, this->f, this->unit, this->id);
+    }
+
+    void printByts() {
+        Serial.printf("%d %d %d %d\n", this->u8[0], this->u8[1], this->u8[2], this->u8[3]);
     }
 };
 
@@ -49,6 +57,12 @@ class sensor3_t {
     sensor1_t x;
     sensor1_t y;
     sensor1_t z;
+
+    void print() {
+        Serial.printf("%sX:%.2f[%s] \t id:%d\n", this->name, this->x.f, this->x.unit, this->x.id);
+        Serial.printf("%sY:%.2f[%s] \t id:%d\n", this->name, this->y.f, this->y.unit, this->y.id);
+        Serial.printf("%sZ:%.2f[%s] \t id:%d\n", this->name, this->z.f, this->z.unit, this->z.id);
+    }
 };
 
 class sensor4_t {
@@ -67,20 +81,13 @@ class sensor4_t {
     sensor1_t x;
     sensor1_t y;
     sensor1_t z;
+
+    void print() {
+        Serial.printf("%sW:%.2f[%s] \t id:%d\n", this->name, this->w.f, this->w.unit, this->w.id);
+        Serial.printf("%sX:%.2f[%s] \t id:%d\n", this->name, this->x.f, this->x.unit, this->x.id);
+        Serial.printf("%sY:%.2f[%s] \t id:%d\n", this->name, this->y.f, this->y.unit, this->y.id);
+        Serial.printf("%sZ:%.2f[%s] \t id:%d\n", this->name, this->z.f, this->z.unit, this->z.id);
+    }
 };
-
-// print関数
-// void printXYZValues(sensor3_t &sensor) {
-//     printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.x.name, (float)sensor.x, sensor.x.unit, sensor.x.id);
-//     printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.y.name, (float)sensor.y, sensor.y.unit, sensor.y.id);
-//     printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, sensor.z.name, (float)sensor.z, sensor.z.unit, sensor.z.id);
-// }
-// void printValue(sensor1_t &sensor) {
-//     printf("%s%s:%.2f[%s] \t id:%d\n", sensor.name, (float)sensor, sensor.unit, sensor.id);
-// }
-
-// void printBytes(sensor1_t &sensor) {
-//     printf("%d %d %d %d\n", sensor.value.u8[0], sensor.value.u8[1], sensor.value.u8[2], sensor.value.u8[3]);
-// }
 
 #endif
