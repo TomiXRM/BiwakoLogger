@@ -24,15 +24,9 @@ const char *hostname = "BEP_ESP_MOTHER"; //ホスト名を設定する
 
 // create instance
 Ticker tick;
-OneWire oneWire(ONE_WIRE_BUS_PIN);
-DallasTemperature waterTemp(&oneWire);
 BluetoothSerial SerialBT;
 TinyGPSPlus tinyGPS;
 File myfile; // SDカードの状態を格納
-
-// multiTask
-TaskHandle_t thp[2];
-QueueHandle_t xQueue_1;
 
 // global variables
 volatile struct {
@@ -46,30 +40,6 @@ volatile struct {
     } gps;
 } data;
 
-// prototypes
-void Core0a(void *args);
-void Core1a(void *args);
-
-// task1 (Core1) : read temperature and pressure
-void Core1a(void *args) {
-    float tmp;
-    while (1) {
-        waterTemp.requestTemperatures();
-        tmp = waterTemp.getTempCByIndex(0);
-        xQueueSend(xQueue_1, &tmp, 0);
-    }
-}
-
-// task2 (Core0) : put water temperature to global variable
-void Core0a(void *args) {
-    float tmp = 0;
-    while (1) {
-        // wait for queue to be filled
-        xQueueReceive(xQueue_1, &tmp, portMAX_DELAY);
-        data.temp = tmp; // put to global variable
-    }
-}
-
 void writeSD(String fileName, String data) {
     String filePath = "/" + fileName + ".csv";
 
@@ -82,12 +52,27 @@ void writeSD(String fileName, String data) {
     }
 }
 
-void read_pressure() {
-    data._pressure[0] = data._pressure[1];
-    data._pressure[1] = analogRead(PRESSURE_SENSOR_PIN);
-    data._pressure[1] = data._pressure[1] * 0.5 + data._pressure[0] * 0.5;
-    data.pressure = data._pressure[1];
-    // Serial.printf("pressure:%d\r\n", data.pressure);
-    // SerialBT.printf("pressure:%d\r\n", data.pressure);
+void readGPS() {
+    while (Serial2.available()) {
+        char buf[256]{NULL};
+        Serial.printf("\n\n -Avairable:%d\n\n", Serial2.available());
+        Serial2.readBytes(buf, Serial2.available());
+        for (size_t i = 0; i < 256; i++) {
+            if (buf[i] == NULL) break;
+            tinyGPS.encode(buf[i]);
+            Serial.print(buf[i]);
+        }
+    }
+    if (tinyGPS.location.isUpdated()) {
+        data.gps.latitude = tinyGPS.location.lat();
+        data.gps.longitude = tinyGPS.location.lng();
+        Serial.printf("%f,%f\r\n", data.gps.latitude, data.gps.longitude);
+    }
+
+    // sprintf(text, "wp,%d,wt,%.2f", data.pressure, data.temp);
+    // Serial.printf("%s\r\n", text);
+    // SerialBT.printf("%s\r\n", text);
+    // writeSD("test", text);
 }
+
 #endif

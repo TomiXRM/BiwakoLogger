@@ -30,8 +30,8 @@ class System {
     Mode_t modes[32];
     Mode_t modeRunning;
     Mode_t modePrevRunning;
-    uint8_t runningModeIndex;
-    uint8_t runningModeIndexPrev;
+    int8_t runningModeIndex;
+    int8_t runningModeIndexPrev;
     BluetoothSerial *SerialBT;
 };
 #endif

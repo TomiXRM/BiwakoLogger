@@ -34,7 +34,7 @@ void setup() {
     CAN.onReceive(onReceive);
 }
 
-// CAN受信時に呼び出される関数
+// CAN受信時に呼び出される関数 
 void onReceive(int packetSize) {
 
     Serial.print("Received ");
@@ -69,8 +69,8 @@ void onReceive(int packetSize) {
 
 void loop() {
     Serial.println("loop");
-    CAN.beginPacket(0x100, 5, true); // Slaveにデータ送信のリクエスト(RTR設定)
-    CAN.endPacket();                  // Slaveにデータ送信のリクエスト(送信)
+    CAN.beginPacket(71, 4, true); // Slaveにデータ送信のリクエスト(RTR設定)
+    CAN.endPacket();             // Slaveにデータ送信のリクエスト(送信)
     delay(100);
 }
 #endif

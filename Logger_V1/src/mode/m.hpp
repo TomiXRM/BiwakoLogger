@@ -17,6 +17,32 @@ Sensor4_t quat(80, "quat", "q");
 
 timer ttt;
 
+Sensor1_t *sensors1[] = {&temp, &press};
+Sensor3_t *sensors3[] = {&acc, &mag, &gyro, &grav, &euler};
+Sensor4_t *sensors4[] = {&quat};
+
+// make canId list from sensors list
+
+long canIdList[20] = {0};
+int canIdQty = 0;
+
+void makeCanIdList(long *canIdList, int *canIdQty) {
+    int i = 0;
+    for (size_t j = 0; j < sizeof(sensors1) / sizeof(sensors1[0]); j++) {
+        canIdList[i] = sensors1[j]->id;
+        i++;
+    }
+    for (size_t j = 0; j < sizeof(sensors3) / sizeof(sensors3[0]); j++) {
+        canIdList[i] = sensors3[j]->id;
+        i++;
+    }
+    for (size_t j = 0; j < sizeof(sensors4) / sizeof(sensors4[0]); j++) {
+        canIdList[i] = sensors4[j]->id;
+        i++;
+    }
+    *canIdQty = i;
+}
+
 void print() {
     temp.print();
     press.print();
@@ -27,35 +53,70 @@ void print() {
     euler.print();
     quat.print();
 
-    Serial.print("\033[H");
-    Serial.print("\033[2J");
+    // Serial.print("\033[H");
+    // Serial.print("\033[2J");
 }
 
 void canSend() {
-    canSender.sendSensor1(temp);
-    canSender.sendSensor1(press);
-    canSender.sendSensor3(acc);
-    canSender.sendSensor3(mag);
-    canSender.sendSensor3(gyro);
-    canSender.sendSensor3(grav);
-    canSender.sendSensor3(euler);
-    canSender.sendSensor4(quat);
+    canSender.send(temp);
+    canSender.send(press);
+    canSender.send(acc);
+    canSender.send(mag);
+    canSender.send(gyro);
+    canSender.send(grav);
+    canSender.send(euler);
+    canSender.send(quat);
 }
 
 static void m_before() {
     Serial.println("m_before");
+    makeCanIdList(canIdList, &canIdQty);
+    // print canIdList
+    Serial.println("--canIdList--");
+    for (size_t i = 0; i < canIdQty; i++) {
+        Serial.printf("%d ", canIdList[i]);
+    }
+    Serial.println();
 }
 
 static void m_body() {
-    // Serial.println("m_body");
     ttt.reset();
     sensors.readIMU(acc, mag, gyro, grav, euler, quat);
     temp.f = ___temp;
     press.f = ___press;
 
-    print();
-    canSend();
-    Serial.println(ttt.read_ms());
+    // print();
+    // checkCan();
+    int packetSize = CAN.parsePacket();  //パケットサイズの確認
+    if (packetSize) {                    // CANバスからデータを受信したら
+        canSender.onReceive(packetSize); //受信時に呼び出される関数を呼び出す
+        long matchId = canSender.chechMatch((long *)canIdList, canIdQty);
+        // Serial.printf("matchId is %d\n" matchId);
+        // send data
+        for (size_t i = 0; i < sizeof(sensors1) / sizeof(sensors1[0]); i++) {
+            // Serial.printf("%d ==%d ? \r\n", matchId, sensors1[i]->id);
+            if (sensors1[i]->id == matchId) {
+                canSender.send(*sensors1[i]);
+                return;
+            }
+        }
+        for (size_t i = 0; i < sizeof(sensors3) / sizeof(sensors3[0]); i++) {
+            // Serial.printf("%d ==%d ? \r\n", matchId, sensors3[i]->id);
+            if (sensors3[i]->id == matchId) {
+                canSender.send(*sensors3[i]);
+                return;
+            }
+        }
+        for (size_t i = 0; i < sizeof(sensors4) / sizeof(sensors4[0]); i++) {
+            // Serial.printf("%d ==%d ? \r\n", matchId, sensors4[i]->id);
+            if (sensors4[i]->id == matchId) {
+                canSender.send(*sensors4[i]);
+                return;
+            }
+        }
+    }
+    // canSend();
+    // Serial.println(ttt.read_ms());
 }
 
 static void m_after() {

@@ -14,8 +14,19 @@ void System::begin() {
 
     modeQty = 0;
     runningModeIndex = 0;
-    modePrev = 'M';
+    runningModeIndexPrev = 0;
+    modePrev = '*';
     mode = 'M';
+
+    void doNothing();
+    Mode_t donothing = {
+        "do nothing",
+        '*',
+        doNothing,
+        doNothing,
+        doNothing,
+    };
+    addMode(donothing);
 }
 
 void System::setMode(char mode) {
@@ -90,4 +101,8 @@ void System::run() {
         delay(500);
     }
     runningModeIndexPrev = runningModeIndex;
+}
+
+void doNothing() {
+    // Serial.println("do nothing");
 }

@@ -4,14 +4,16 @@
 #include "mode/m.hpp"
 #include "mode/calibrationMode.hpp"
 
+void onReceive(int packetSize);
+
 void setup() {
     // initialize serial communication
-    Serial.begin(115200);
+    Serial.begin(1000000);
     SerialBT.begin(HOSTNAME);
 
     // initialize CAN communication
     canSender.begin(1000E3);
-
+    // CAN.onReceive(onReceive);
     // initialize system Manager
     sysManager.begin();
 
