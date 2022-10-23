@@ -74,7 +74,7 @@ int CanSender::getRequestBytes() {
 }
 
 void CanSender::send(Sensor1_t &sensor) {
-    Serial.printf(" - Sending id 0x%x %f\r\n", sensor.id, sensor.f);
+    Serial.printf(" - Send 0x%x %s %f[%s]\r\n", sensor.id, sensor.name, sensor.f, sensor.unit);
     CAN.beginPacket(sensor.id);
     CAN.write(sensor.u8, 4);
     CAN.endPacket();

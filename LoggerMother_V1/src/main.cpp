@@ -86,25 +86,25 @@ void loop() {
 
     CAN.beginPacket(10, 4, true);
     CAN.endPacket();
-
+    delay(100);
     CAN.beginPacket(20, 4, true);
     CAN.endPacket();
-
+    delay(100);
     CAN.beginPacket(30, 4, true);
     CAN.endPacket();
-
+    delay(100);
     CAN.beginPacket(40, 4, true);
     CAN.endPacket();
-
+    delay(100);
     CAN.beginPacket(50, 4, true);
     CAN.endPacket();
-
+    delay(100);
     CAN.beginPacket(60, 4, true);
     CAN.endPacket();
-
+    delay(100);
     CAN.beginPacket(70, 4, true); // Slaveにデータ送信のリクエスト(RTR設定)
     CAN.endPacket();              // Slaveにデータ送信のリクエスト(送信)
-
+    delay(100);
     CAN.beginPacket(80, 4, true);
     CAN.endPacket();
     delay(100);

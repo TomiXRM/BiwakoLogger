@@ -4,7 +4,8 @@
 #include "mode/m.hpp"
 #include "mode/calibrationMode.hpp"
 
-void onReceive(int packetSize);
+extern void Core0a(void *args);
+extern void Core1a(void *args);
 
 void setup() {
     // initialize serial communication
@@ -22,6 +23,10 @@ void setup() {
     // add modes
     sysManager.addMode(mode_m);
     sysManager.addMode(mode_c);
+
+    // initialize water temperature and pressue sensor
+    xTaskCreatePinnedToCore(Core0a, "Core0a", 4096, 0, 1, &thp[0], 0);
+    xTaskCreatePinnedToCore(Core1a, "Core1a", 4096, 0, 1, &thp[1], 1);
 }
 
 void loop() {

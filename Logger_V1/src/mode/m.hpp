@@ -13,7 +13,7 @@ Sensor3_t mag(40, "mag", "uT");
 Sensor3_t gyro(50, "gyro", "rad/s");
 Sensor3_t grav(60, "grav", "m/s^2");
 Sensor3_t euler(70, "euler", "rad");
-Sensor4_t quat(80, "quat", "q");
+Sensor4_t quat(80, "quat", "");
 
 timer ttt;
 
@@ -91,11 +91,12 @@ static void m_body() {
     if (packetSize) {                    // CANバスからデータを受信したら
         canSender.onReceive(packetSize); //受信時に呼び出される関数を呼び出す
         long matchId = canSender.chechMatch((long *)canIdList, canIdQty);
-        // Serial.printf("matchId is %d\n" matchId);
+        Serial.printf("matchId is %d ", matchId);
         // send data
         for (size_t i = 0; i < sizeof(sensors1) / sizeof(sensors1[0]); i++) {
             // Serial.printf("%d ==%d ? \r\n", matchId, sensors1[i]->id);
             if (sensors1[i]->id == matchId) {
+                Serial.printf("%s\r\n", sensors1[i]->name);
                 canSender.send(*sensors1[i]);
                 return;
             }
@@ -103,6 +104,7 @@ static void m_body() {
         for (size_t i = 0; i < sizeof(sensors3) / sizeof(sensors3[0]); i++) {
             // Serial.printf("%d ==%d ? \r\n", matchId, sensors3[i]->id);
             if (sensors3[i]->id == matchId) {
+                Serial.printf("%s\r\n", sensors3[i]->name);
                 canSender.send(*sensors3[i]);
                 return;
             }
@@ -110,12 +112,12 @@ static void m_body() {
         for (size_t i = 0; i < sizeof(sensors4) / sizeof(sensors4[0]); i++) {
             // Serial.printf("%d ==%d ? \r\n", matchId, sensors4[i]->id);
             if (sensors4[i]->id == matchId) {
+                Serial.printf("%s\r\n", sensors4[i]->name);
                 canSender.send(*sensors4[i]);
                 return;
             }
         }
     }
-    // canSend();
     // Serial.println(ttt.read_ms());
 }
 
