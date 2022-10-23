@@ -1,18 +1,10 @@
 #include "Sensors.hpp"
 
-// Sensors::Sensors() : bno(55, 0x28) {
-// }
-
 Sensors::Sensors(BluetoothSerial *_SerialBT) : bno(55, 0x28) {
     SerialBT = _SerialBT;
 }
 
 void Sensors::begin() {
-    xQueue_1 = xQueueCreate(1, sizeof(Sensor1_t));
-    oneWire = OneWire(ONE_WIRE_BUS);
-    waterTemp = DallasTemperature(&oneWire);
-    xTaskCreatePinnedToCore(Core0a, "Core0a", 10000, this, 1, &thp[0], 0);
-    xTaskCreatePinnedToCore(Core1a, "Core1a", 10000, this, 1, &thp[1], 1);
     uint8_t c = 0;
     while (!bno.begin()) {
         c++;

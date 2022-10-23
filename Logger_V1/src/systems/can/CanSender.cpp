@@ -20,25 +20,75 @@ void CanSender::begin(long canBaud) {
     }
 }
 
+void CanSender::onReceive(int packetSize) {
+    Serial.print("Received ");
+
+    isExtended = CAN.packetExtended();
+    if (isExtended) Serial.print(" extended ");
+
+    isRtr = CAN.packetRtr();
+    if (isRtr) Serial.print("RTR ");
+
+    receivedCanId = CAN.packetId();
+    Serial.printf("packet with id 0x%x", receivedCanId);
+
+    if (isRtr) {
+        requestBytes = CAN.packetDlc();
+        Serial.printf(" and requested length %d", requestBytes);
+    } else {
+        Serial.printf(" and length %d", packetSize);
+        // only print packet data for non-RTR packets
+        while (CAN.available()) {
+            Serial.print((char)CAN.read());
+        }
+        Serial.println();
+    }
+
+    Serial.println();
+}
+
 void CanSender::baud(long canBaud) {
     CAN.begin(canBaud);
 }
 
-void CanSender::sendSensor1(Sensor1_t &sensor) {
+long CanSender::chechMatch(long *canId, int canIdQty) {
+    for (size_t i = 0; i < canIdQty; i++) {
+        if (receivedCanId == canId[i]) {
+            return receivedCanId;
+        }
+    }
+    return -1;
+}
+
+long CanSender::getReceivedCanId() {
+    return receivedCanId;
+}
+bool CanSender::getIsExtended() {
+    return isExtended;
+}
+bool CanSender::getIsRtr() {
+    return isRtr;
+}
+int CanSender::getRequestBytes() {
+    return requestBytes;
+}
+
+void CanSender::send(Sensor1_t &sensor) {
+    Serial.printf(" - Send 0x%x %s %f[%s]\r\n", sensor.id, sensor.name, sensor.f, sensor.unit);
     CAN.beginPacket(sensor.id);
     CAN.write(sensor.u8, 4);
     CAN.endPacket();
 }
 
-void CanSender::sendSensor3(Sensor3_t &sensor) {
-    sendSensor1(sensor.x);
-    sendSensor1(sensor.y);
-    sendSensor1(sensor.z);
+void CanSender::send(Sensor3_t &sensor) {
+    send(sensor.x);
+    send(sensor.y);
+    send(sensor.z);
 }
 
-void CanSender::sendSensor4(Sensor4_t &sensor) {
-    sendSensor1(sensor.w);
-    sendSensor1(sensor.x);
-    sendSensor1(sensor.y);
-    sendSensor1(sensor.z);
+void CanSender::send(Sensor4_t &sensor) {
+    send(sensor.w);
+    send(sensor.x);
+    send(sensor.y);
+    send(sensor.z);
 }

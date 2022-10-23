@@ -10,7 +10,9 @@ static void c_before() {
 }
 
 static void c_body() {
-    Serial.println("Calibration Mode");
+    // Serial.println("Calibration Mode");
+    Serial.println(___temp);
+    delay(250);
 }
 
 static void c_after() {

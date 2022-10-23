@@ -20,7 +20,7 @@ void setup(void) {
         digitalWrite(LED_PIN, !digitalRead(LED_PIN));
     });
     // start serial port
-    Serial.begin(2000000);
+    Serial.begin(1000000);
     pinMode(ONE_WIRE_BUS, INPUT_PULLUP);
     Serial.println("Dallas Temperature IC Control Library Demo");
 
