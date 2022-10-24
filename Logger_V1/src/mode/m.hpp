@@ -12,7 +12,7 @@ Sensor3_t acc(30, "acc", "m/s^2");
 Sensor3_t mag(40, "mag", "uT");
 Sensor3_t gyro(50, "gyro", "rad/s");
 Sensor3_t grav(60, "grav", "m/s^2");
-Sensor3_t euler(70, "euler", "rad");
+Sensor3_t euler(70, "euler", "deg");
 Sensor4_t quat(80, "quat", "");
 
 timer ttt;

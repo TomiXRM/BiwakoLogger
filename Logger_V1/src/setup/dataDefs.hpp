@@ -36,6 +36,7 @@ class Sensor1_t {
 
     void print() {
         Serial.printf("%s:%.2f[%s] \t id:%d\n", this->name, this->f, this->unit, this->id);
+        // x:0.00[deg]  id:0x200
     }
 
     void printByts() {
