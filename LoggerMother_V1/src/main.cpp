@@ -2,7 +2,7 @@
 #include "setup.hpp"
 #include "dataDefs.hpp"
 #include <CAN.h>
-
+#define CAN_DEBUG
 int canId;
 
 Sensor1_t temp(10, "temp", "℃");
@@ -70,13 +70,15 @@ void read(uint8_t packetSize, Sensor1_t &s1) {
 
 // CAN受信時に呼び出される関数
 void onReceive(int packetSize) {
+    
     Serial.print("Receive: ");
 
     isExtended = CAN.packetExtended();
     if (isExtended) Serial.print(" extended ");
 
     isRtr = CAN.packetRtr();
-    if (isRtr) Serial.print("RTR ");
+    if (isRtr)
+        Serial.print(" RTR ");
 
     receivedCanId = CAN.packetId();
     // Serial.printf("packet with id 0x%x", receivedCanId);
@@ -177,28 +179,29 @@ void setup() {
 
 void loop() {
     // readGPS();
+    int interval = 30;
     CAN.beginPacket(10, 4, true);
     CAN.endPacket();
-    delay(100);
+    delay(interval);
     CAN.beginPacket(20, 4, true);
     CAN.endPacket();
-    delay(100);
+    delay(interval);
     CAN.beginPacket(30, 4, true);
     CAN.endPacket();
-    delay(100);
+    delay(interval);
     CAN.beginPacket(40, 4, true);
     CAN.endPacket();
-    delay(100);
+    delay(interval);
     CAN.beginPacket(50, 4, true);
     CAN.endPacket();
-    delay(100);
+    delay(interval);
     CAN.beginPacket(60, 4, true);
     CAN.endPacket();
-    delay(100);
+    delay(interval);
     CAN.beginPacket(70, 4, true); // Slaveにデータ送信のリクエスト(RTR設定)
     CAN.endPacket();              // Slaveにデータ送信のリクエスト(送信)
-    delay(100);
+    delay(interval);
     CAN.beginPacket(80, 4, true);
     CAN.endPacket();
-    delay(100);
+    delay(interval);
 }
