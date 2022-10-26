@@ -1,21 +1,29 @@
 #include "Logger_V1.hpp"
 
-Logger_V1::Logger_V1(int id, int logLevel, bool debug) {
+Logger_V1::Logger_V1(int id, int logLevel, bool debug)
+    : temp(id + 10, "temp", "C"),
+      press(id + 20, "press", "Pa"),
+      acc(id + 30, "acc", "m/s^2"),
+      mag(id + 40, "mag", "uT"),
+      gyro(id + 50, "gyro", "deg/s"),
+      grav(id + 60, "grav", "m/s^2"),
+      euler(id + 70, "euler", "deg"),
+      quat(id + 80, "quat", "") {
     this->id = id;
-    Log.begin(LOG_LEVEL_VERBOSE, &Serial, debug);
+    Log.begin(logLevel, &Serial, debug);
     Log.notice("Logger_V1 %d created", id);
 }
 
 void Logger_V1::init() {
     // append sensors to the logger
-    temp = Sensor1_t(id + 10, "temp", "C");
-    press = Sensor1_t(id + 20, "press", "Pa");
-    acc = Sensor3_t(id + 30, "acc", "m/s^2");
-    mag = Sensor3_t(id + 40, "mag", "uT");
-    gyro = Sensor3_t(id + 50, "gyro", "rad/s");
-    grav = Sensor3_t(id + 60, "grav", "m/s^2");
-    euler = Sensor3_t(id + 70, "euler", "deg");
-    quat = Sensor4_t(id + 80, "quat", "");
+    // temp = Sensor1_t(id + 10, "temp", "C");
+    // press = Sensor1_t(id + 20, "press", "Pa");
+    // acc = Sensor3_t(id + 30, "acc", "m/s^2");
+    // mag = Sensor3_t(id + 40, "mag", "uT");
+    // gyro = Sensor3_t(id + 50, "gyro", "rad/s");
+    // grav = Sensor3_t(id + 60, "grav", "m/s^2");
+    // euler = Sensor3_t(id + 70, "euler", "deg");
+    // quat = Sensor4_t(id + 80, "quat", "");
     appendSensor(&temp);
     appendSensor(&press);
     appendSensor(&acc);
@@ -63,6 +71,7 @@ void Logger_V1::makeCanIdList() {
 }
 
 void Logger_V1::sendRequest(long id, int interval) {
+    Log.noticeln("sendRequest %d", id);
     CAN.beginPacket(id, 4, true);
     CAN.endPacket();
     requestedCanId = id;
@@ -87,12 +96,12 @@ void Logger_V1::read(uint8_t packetSize, Sensor1_t &s1) {
         s1.u8[1] = buf[1];
         s1.u8[2] = buf[2];
         s1.u8[3] = buf[3];
-        Log.trace(" %.2f\n", s1.f);
+        Log.trace(" %f\n", s1.f);
     }
 }
 
-void Logger_V1::onReceive(int packetSize) {
-    Log.trace("Receive: ");
+void Logger_V1::onReceive(int packetSize, long receivedCanId) {
+    // Log.trace("Receive: ");
 
     isExtended = CAN.packetExtended();
     if (isExtended) Log.trace(" extended ");
@@ -100,10 +109,8 @@ void Logger_V1::onReceive(int packetSize) {
     isRtr = CAN.packetRtr();
     if (isRtr)
         Log.trace("RTR ");
-
-    receivedCanId = CAN.packetId();
     // Serial.printf("packet with id 0x%x", receivedCanId);
-    Log.trace("%d ", receivedCanId);
+    Log.trace("Id:%d ", receivedCanId);
     // check match canId
     for (size_t i = 0; i < sizeof(sensors1) / sizeof(sensors1[0]); i++) {
         if (sensors1[i]->id == receivedCanId && receivedCanId == requestedCanId) {

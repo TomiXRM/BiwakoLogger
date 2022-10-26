@@ -2,7 +2,7 @@
 #define LOGEGR_V1_HPP
 #include <Arduino.h>
 #include <ArduinoLog.h>
-#include "dataDefs.hpp"
+#include "./dataDefs.hpp"
 #include <CAN.h>
 
 class Logger_V1 {
@@ -20,7 +20,7 @@ class Logger_V1 {
 
     void read(uint8_t packetSize, Sensor1_t &s1);
 
-    void onReceive(int packetSize);
+    void onReceive(int packetSize, long receivedCanId);
 
     int getId() { return id; }
     Sensor1_t temp;
