@@ -1,36 +1,46 @@
-#ifndef CAN_FUNCTIONS_HPP
-#define CAN_FUNCTIONS_HPP
+#include "Logger_V1.hpp"
 
-#include <Arduino.h>
-#include "dataDefs.hpp"
-#include <CAN.h>
-#include <ArduinoLog.h>
+Logger_V1::Logger_V1(int id, int logLevel, bool debug) {
+    this->id = id;
+    Log.begin(LOG_LEVEL_VERBOSE, &Serial, debug);
+    Log.notice("Logger_V1 %d created", id);
+}
 
-long canIdList[20] = {0};
-int canIdQty = 0;
+void Logger_V1::init() {
+    // append sensors to the logger
+    temp = Sensor1_t(id + 10, "temp", "C");
+    press = Sensor1_t(id + 20, "press", "Pa");
+    acc = Sensor3_t(id + 30, "acc", "m/s^2");
+    mag = Sensor3_t(id + 40, "mag", "uT");
+    gyro = Sensor3_t(id + 50, "gyro", "rad/s");
+    grav = Sensor3_t(id + 60, "grav", "m/s^2");
+    euler = Sensor3_t(id + 70, "euler", "deg");
+    quat = Sensor4_t(id + 80, "quat", "");
+    appendSensor(&temp);
+    appendSensor(&press);
+    appendSensor(&acc);
+    appendSensor(&mag);
+    appendSensor(&gyro);
+    appendSensor(&grav);
+    appendSensor(&euler);
+    appendSensor(&quat);
+}
 
-bool isExtended;
-bool isRemote;
-bool isRtr;
-int requestBytes;
-long receivedCanId;
-long requestedCanId;
+void Logger_V1::appendSensor(Sensor1_t *s1) {
+    sensors1[s1Qty] = s1;
+    s1Qty++;
+}
 
-Sensor1_t temp(10, "temp", "℃");
-Sensor1_t press(20, "press", "Pa");
-Sensor3_t acc(30, "acc", "m/s^2");
-Sensor3_t mag(40, "mag", "uT");
-Sensor3_t gyro(50, "gyro", "rad/s");
-Sensor3_t grav(60, "grav", "m/s^2");
-Sensor3_t euler(70, "euler", "rad");
-Sensor4_t quat(80, "quat", "");
+void Logger_V1::appendSensor(Sensor3_t *s3) {
+    sensors3[s3Qty] = s3;
+    s3Qty++;
+}
+void Logger_V1::appendSensor(Sensor4_t *s4) {
+    sensors4[s4Qty] = s4;
+    s4Qty++;
+}
 
-Sensor1_t *sensors[] = {&temp, &press, &acc.x, &acc.y, &acc.z, &mag.x, &mag.y, &mag.z, &gyro.x, &gyro.y, &gyro.z, &grav.x, &grav.y, &grav.z, &euler.x, &euler.y, &euler.z, &quat.w, &quat.x, &quat.y, &quat.z};
-Sensor1_t *sensors1[] = {&temp, &press};
-Sensor3_t *sensors3[] = {&acc, &mag, &gyro, &grav, &euler};
-Sensor4_t *sensors4[] = {&quat};
-
-void makeCanIdList(long *canIdList, int *canIdQty) {
+void Logger_V1::makeCanIdList() {
     int i = 0;
     for (size_t j = 0; j < sizeof(sensors1) / sizeof(sensors1[0]); j++) {
         canIdList[i] = sensors1[j]->id;
@@ -44,15 +54,22 @@ void makeCanIdList(long *canIdList, int *canIdQty) {
         canIdList[i] = sensors4[j]->id;
         i++;
     }
-    *canIdQty = i;
+    canIdQty = i;
     Log.notice("--canIdList--");
-    for (size_t i = 0; i < *canIdQty; i++) {
+    for (size_t i = 0; i < canIdQty; i++) {
         Log.notice("%d ", canIdList[i]);
     }
     Serial.println();
 }
 
-void read(uint8_t packetSize, Sensor1_t &s1) {
+void Logger_V1::sendRequest(long id, int interval) {
+    CAN.beginPacket(id, 4, true);
+    CAN.endPacket();
+    requestedCanId = id;
+    delay(interval);
+}
+
+void Logger_V1::read(uint8_t packetSize, Sensor1_t &s1) {
     if (isRtr) {
         requestBytes = CAN.packetDlc();
         Log.trace(" and requested length %d", requestBytes);
@@ -74,8 +91,7 @@ void read(uint8_t packetSize, Sensor1_t &s1) {
     }
 }
 
-// CAN受信時に呼び出される関数
-void onReceive(int packetSize) {
+void Logger_V1::onReceive(int packetSize) {
     Log.trace("Receive: ");
 
     isExtended = CAN.packetExtended();
@@ -90,46 +106,46 @@ void onReceive(int packetSize) {
     Log.trace("%d ", receivedCanId);
     // check match canId
     for (size_t i = 0; i < sizeof(sensors1) / sizeof(sensors1[0]); i++) {
-        if (sensors1[i]->id == receivedCanId) {
+        if (sensors1[i]->id == receivedCanId && receivedCanId == requestedCanId) {
             Log.trace("%s", sensors1[i]->name);
             read(packetSize, *sensors1[i]);
             break;
         }
     }
     for (size_t i = 0; i < sizeof(sensors3) / sizeof(sensors3[0]); i++) {
-        if (sensors3[i]->x.id == receivedCanId) {
+        if (sensors3[i]->x.id == receivedCanId && receivedCanId == requestedCanId + 1) {
             Log.trace("%s%s", sensors3[i]->name, sensors3[i]->x.name);
             read(packetSize, sensors3[i]->x);
             break;
         }
-        if (sensors3[i]->y.id == receivedCanId) {
+        if (sensors3[i]->y.id == receivedCanId && receivedCanId == requestedCanId + 2) {
             Log.trace("%s%s", sensors3[i]->name, sensors3[i]->y.name);
             read(packetSize, sensors3[i]->y);
             break;
         }
-        if (sensors3[i]->z.id == receivedCanId) {
+        if (sensors3[i]->z.id == receivedCanId && receivedCanId == requestedCanId + 3) {
             Log.trace("%s%s", sensors3[i]->name, sensors3[i]->z.name);
             read(packetSize, sensors3[i]->z);
             break;
         }
     }
     for (size_t i = 0; i < sizeof(sensors4) / sizeof(sensors4[0]); i++) {
-        if (sensors4[i]->w.id == receivedCanId) {
+        if (sensors4[i]->w.id == receivedCanId && receivedCanId == requestedCanId + 1) {
             Log.trace("%s%s", sensors4[i]->name, sensors4[i]->w.name);
             read(packetSize, sensors4[i]->w);
             break;
         }
-        if (sensors4[i]->x.id == receivedCanId) {
+        if (sensors4[i]->x.id == receivedCanId && receivedCanId == requestedCanId + 2) {
             Log.trace("%s%s", sensors4[i]->name, sensors4[i]->x.name);
             read(packetSize, sensors4[i]->x);
             break;
         }
-        if (sensors4[i]->y.id == receivedCanId) {
+        if (sensors4[i]->y.id == receivedCanId && receivedCanId == requestedCanId + 3) {
             Log.trace("%s%s", sensors4[i]->name, sensors4[i]->y.name);
             read(packetSize, sensors4[i]->y);
             break;
         }
-        if (sensors4[i]->z.id == receivedCanId) {
+        if (sensors4[i]->z.id == receivedCanId && receivedCanId == requestedCanId + 4) {
             Log.trace("%s%s", sensors4[i]->name, sensors4[i]->z.name);
             read(packetSize, sensors4[i]->z);
             break;
@@ -137,11 +153,3 @@ void onReceive(int packetSize) {
     }
     Log.trace("\n");
 }
-
-void sendRequest(long id) {
-    CAN.beginPacket(id, 4, true);
-    CAN.endPacket();
-    requestedCanId = id;
-}
-
-#endif

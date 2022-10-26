@@ -2,8 +2,8 @@
 #define SETUP
 
 #include <Arduino.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
+// #include <OneWire.h>
+// #include <DallasTemperature.h>
 #include <TinyGPS++.h>
 #include <Ticker.h>
 

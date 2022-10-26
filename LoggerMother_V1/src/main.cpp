@@ -2,9 +2,41 @@
 #include "setup.hpp"
 #include "dataDefs.hpp"
 #include <CAN.h>
-#include <canFunctions.hpp>
+#include <./Logger/Logger_V1.hpp>
 #define CAN_DEBUG
 int canId;
+
+Logger_V1 Logger[] = {
+    Logger_V1(0, LOG_LEVEL_VERBOSE, true),
+    Logger_V1(100, LOG_LEVEL_VERBOSE, true),
+    Logger_V1(200, LOG_LEVEL_VERBOSE, true),
+    Logger_V1(300, LOG_LEVEL_VERBOSE, true),
+    Logger_V1(400, LOG_LEVEL_VERBOSE, true),
+    Logger_V1(500, LOG_LEVEL_VERBOSE, true),
+    Logger_V1(600, LOG_LEVEL_VERBOSE, true),
+    Logger_V1(700, LOG_LEVEL_VERBOSE, true),
+    Logger_V1(800, LOG_LEVEL_VERBOSE, true),
+    Logger_V1(900, LOG_LEVEL_VERBOSE, true),
+};
+
+void onReceive(int packetSize) {
+    long packetId = CAN.packetId();
+    int num = packetId;
+    int num_;
+    unsigned digit = 0;
+    while (num != 0) {
+        num_ = num;
+        num /= 10;
+        digit++;
+    }
+    int packetIdForLogger = num_ * pow(10, digit - 1);
+    for (size_t i = 0; i < sizeof(Logger) / sizeof(Logger[0]); i++) {
+        if (Logger[i].getId() == packetIdForLogger) {
+            Logger[i].onReceive(packetSize);
+            break;
+        }
+    }
+}
 
 void setup() {
     Serial.begin(1000000);
@@ -34,30 +66,24 @@ void setup() {
         while (1)
             ;
     }
+
+    for (size_t i = 0; i < sizeof(Logger) / sizeof(Logger[0]); i++) {
+        Logger[i].init();
+    }
     // CAN受信割り込みコールバック関数を設定
     CAN.onReceive(onReceive);
-
-    makeCanIdList(canIdList, &canIdQty);
 }
 
 void loop() {
     // readGPS();
-    int interval = 30;
-    sendRequest(10);
-    delay(interval);
-    sendRequest(20);
-    delay(interval);
-    sendRequest(30);
-    delay(interval);
-    sendRequest(40);
-    delay(interval);
-    sendRequest(50);
-    delay(interval);
-    sendRequest(60);
-    delay(interval);
-    sendRequest(70);
-    delay(interval);
-    sendRequest(80);
-    delay(interval);
-    
+    for (Logger_V1 &logger : Logger) {
+        logger.sendRequest(logger.temp.id, 10);
+        logger.sendRequest(logger.press.id, 10);
+        logger.sendRequest(logger.acc.id, 30);
+        logger.sendRequest(logger.mag.id, 30);
+        logger.sendRequest(logger.gyro.id, 30);
+        logger.sendRequest(logger.grav.id, 30);
+        logger.sendRequest(logger.euler.id, 30);
+        logger.sendRequest(logger.quat.id, 30);
+    }
 }
