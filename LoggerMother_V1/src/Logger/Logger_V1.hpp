@@ -52,5 +52,12 @@ class Logger_V1 {
 
     long id;
     ESP32SJA1000Class *can;
+
+    typedef union {
+        float f;
+        uint8_t buf[4];
+    } da;
+
+    da da_;
 };
 #endif

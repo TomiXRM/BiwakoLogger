@@ -13,6 +13,7 @@ Logger_V1::Logger_V1(int id, int logLevel, bool debug, ESP32SJA1000Class *can)
     this->can = can;
     Log.begin(logLevel, &Serial, debug);
     Log.notice("Logger_V1 %d created", id);
+    s4Qty = s1Qty = s3Qty = 0;
 }
 
 void Logger_V1::init() {
@@ -53,21 +54,21 @@ void Logger_V1::appendSensor(Sensor4_t *s4) {
 void Logger_V1::makeCanIdList() {
     int i = 0;
     Log.noticeln("--A:%");
-    for (size_t j = 0; j < sizeof(sensors1) / sizeof(sensors1[0]); j++) {
+    for (size_t j = 0; j < s1Qty; j++) {
         Log.noticeln("--B %s", sensors1[j]->name);
         canIdList[i] = sensors1[j]->id;
         i++;
         Log.noticeln("--C");
     }
     Log.noticeln("--D");
-    for (size_t j = 0; j < sizeof(sensors3) / sizeof(sensors3[0]); j++) {
+    for (size_t j = 0; j < s3Qty; j++) {
         Log.noticeln("--E %s", sensors3[j]->name);
         canIdList[i] = sensors3[j]->id;
         i++;
         Log.noticeln("--F");
     }
     Log.noticeln("--G");
-    for (size_t j = 0; j < sizeof(sensors4) / sizeof(sensors4[0]); j++) {
+    for (size_t j = 0; j < s4Qty; j++) {
         Log.noticeln("--H %s", sensors4[j]->name);
         canIdList[i] = sensors4[j]->id;
         i++;
@@ -97,17 +98,15 @@ void Logger_V1::read(uint8_t packetSize, Sensor1_t &s1) {
         // Serial.printf(" and length %d ", packetSize);
         // only print packet data for non-RTR packets
         uint8_t i = 0;
-        uint8_t buf[8]{0};
-        // while (can->available()) {
-        //     buf[i] = can->read();
-        //     // Serial.printf("%d ", buf[i]);
-        //     i++;
-        // }
-        s1.u8[0] = buf[0];
-        s1.u8[1] = buf[1];
-        s1.u8[2] = buf[2];
-        s1.u8[3] = buf[3];
-        Log.traceln(" %f", s1.f);
+        uint8_t buf[8] = {0};
+        Serial.println(can->available());
+        while (can->available()) {
+            da_.buf[i] = can->read();
+            Serial.printf("%d ", da_.buf[i]);
+            i++;
+        }
+        s1.f = da_.f;
+        Log.traceln("VALUE:%f %f", s1.f, da_.f);
     }
 }
 
@@ -122,14 +121,14 @@ void Logger_V1::onReceive(int packetSize, long receivedCanId) {
     // Serial.printf("packet with id 0x%x", receivedCanId);
     Log.trace("Id:%d ", receivedCanId);
     // check match canId
-    for (size_t i = 0; i < sizeof(sensors1) / sizeof(sensors1[0]); i++) {
+    for (size_t i = 0; i < s1Qty; i++) {
         if (sensors1[i]->id == receivedCanId && receivedCanId == requestedCanId) {
             Log.trace("%s", sensors1[i]->name);
             read(packetSize, *sensors1[i]);
             break;
         }
     }
-    for (size_t i = 0; i < sizeof(sensors3) / sizeof(sensors3[0]); i++) {
+    for (size_t i = 0; i < s3Qty; i++) {
         if (sensors3[i]->x.id == receivedCanId && receivedCanId == requestedCanId + 1) {
             Log.trace("%s%s", sensors3[i]->name, sensors3[i]->x.name);
             read(packetSize, sensors3[i]->x);
@@ -146,7 +145,7 @@ void Logger_V1::onReceive(int packetSize, long receivedCanId) {
             break;
         }
     }
-    for (size_t i = 0; i < sizeof(sensors4) / sizeof(sensors4[0]); i++) {
+    for (size_t i = 0; i < s4Qty; i++) {
         if (sensors4[i]->w.id == receivedCanId && receivedCanId == requestedCanId + 1) {
             Log.trace("%s%s", sensors4[i]->name, sensors4[i]->w.name);
             read(packetSize, sensors4[i]->w);

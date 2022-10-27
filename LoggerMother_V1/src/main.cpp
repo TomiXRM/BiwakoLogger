@@ -57,8 +57,9 @@ void setup() {
     Logger[0].init();
 
     // Print Logger[0]
+    Logger[0].sensors1[0]->f = 100.0;
     Serial.printf("%s\n", Logger[0].sensors1[0]->name);
-    Serial.printf("%s\n", Logger[0].sensors1[0]->f);
+    Serial.printf("%f\n", Logger[0].sensors1[0]->f);
     // Logger[0].makeCanIdList();
     // for (Logger_V1 &logger : Logger) {
     //     logger.init();
@@ -72,16 +73,16 @@ void loop() {
     // for (Logger_V1 &logger : Logger) {
     Logger[0].sendRequest(Logger[0].temp.id, 100);
     int packetSize = CAN.parsePacket(); //パケットサイズの確認
-    // if (packetSize) {
-    //     // onReceive(packetSize);
-    //     Logger[0].onReceive(packetSize, 110);
-}
-// logger.sendRequest(logger.press.id, 30);
-// logger.sendRequest(logger.acc.id, 30);
-// logger.sendRequest(logger.mag.id, 30);
-// logger.sendRequest(logger.gyro.id, 30);
-// logger.sendRequest(logger.grav.id, 30);
-// logger.sendRequest(logger.euler.id, 30);
-// logger.sendRequest(logger.quat.id, 30);
-// }
+    if (packetSize) {
+        // onReceive(packetSize);
+        Logger[0].onReceive(packetSize, 110);
+    }
+    // logger.sendRequest(logger.press.id, 30);
+    // logger.sendRequest(logger.acc.id, 30);
+    // logger.sendRequest(logger.mag.id, 30);
+    // logger.sendRequest(logger.gyro.id, 30);
+    // logger.sendRequest(logger.grav.id, 30);
+    // logger.sendRequest(logger.euler.id, 30);
+    // logger.sendRequest(logger.quat.id, 30);
+    // }
 }
