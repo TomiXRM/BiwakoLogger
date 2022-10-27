@@ -13,11 +13,12 @@ void onReceive(int packetSize) {
         digit++;
     }
     long packetIdForLogger = num_ * pow(10, digit - 1);
-    Log.notice("packet:%d \n", packetIdForLogger);
+    Log.notice("packetIdForLogger:%d \n", packetIdForLogger);
     for (size_t i = 0; i < sizeof(Logger) / sizeof(Logger[0]); i++) {
         long loggerId = Logger[i].getId();
-        Log.notice("matchId:%d \n", loggerId);
+
         if (loggerId == packetIdForLogger) {
+            Log.notice("matchId:%d at %d \n", loggerId, packetId);
             Logger[i].onReceive(packetSize, packetId);
             break;
         }
@@ -50,22 +51,37 @@ void setup() {
 
     initSD();
     initCan();
-    CAN.onReceive(onReceive);
+    // CAN.onReceive(onReceive);
     Log.notice("Ready");
     SerialBT.println("Ready");
+    Logger[0].init();
+
+    // Print Logger[0]
+    Serial.printf("%s\n", Logger[0].sensors1[0]->name);
+    Serial.printf("%s\n", Logger[0].sensors1[0]->f);
+    // Logger[0].makeCanIdList();
+    // for (Logger_V1 &logger : Logger) {
+    //     logger.init();
+    //     logger.makeCanIdList();
+    // }
 }
 
 void loop() {
     // readGPS();
     // Log.noticeln("CAN:");
-    for (Logger_V1 &logger : Logger) {
-        logger.sendRequest(logger.temp.id, 30);
-        logger.sendRequest(logger.press.id, 30);
-        logger.sendRequest(logger.acc.id, 30);
-        logger.sendRequest(logger.mag.id, 30);
-        logger.sendRequest(logger.gyro.id, 30);
-        logger.sendRequest(logger.grav.id, 30);
-        logger.sendRequest(logger.euler.id, 30);
-        logger.sendRequest(logger.quat.id, 30);
-    }
+    // for (Logger_V1 &logger : Logger) {
+    Logger[0].sendRequest(Logger[0].temp.id, 100);
+    int packetSize = CAN.parsePacket(); //パケットサイズの確認
+    // if (packetSize) {
+    //     // onReceive(packetSize);
+    //     Logger[0].onReceive(packetSize, 110);
+}
+// logger.sendRequest(logger.press.id, 30);
+// logger.sendRequest(logger.acc.id, 30);
+// logger.sendRequest(logger.mag.id, 30);
+// logger.sendRequest(logger.gyro.id, 30);
+// logger.sendRequest(logger.grav.id, 30);
+// logger.sendRequest(logger.euler.id, 30);
+// logger.sendRequest(logger.quat.id, 30);
+// }
 }
