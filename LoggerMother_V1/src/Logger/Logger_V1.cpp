@@ -104,7 +104,7 @@ void Logger_V1::read(uint8_t packetSize, Sensor1_t &s1) {
         s1.u8[2] = buf[2];
         s1.u8[3] = buf[3];
         // ArduinoLog CANNOT PRINT FLOATS
-        Serial.printf("VALUE:%f", s1.f);
+        Serial.printf(":%f", s1.f);
     }
 }
 
@@ -115,7 +115,7 @@ void Logger_V1::onReceive(int packetSize, long receivedCanId) {
 
     isRtr = can->packetRtr();
     // if (isRtr)Log.trace("RTR ");
-    Serial.printf("packet with id 0x%x(%ld)", receivedCanId, receivedCanId);
+    Serial.printf("- packetId:0x%x(%ld) ", receivedCanId, receivedCanId);
     // check match canId
     bool match = false;
     for (size_t i = 0; i < s1Qty; i++) {
@@ -180,6 +180,5 @@ void Logger_V1::onReceive(int packetSize, long receivedCanId) {
                 break;
             }
         }
-        Serial.println();
     }
 }

@@ -159,15 +159,6 @@ void setup() {
 void loop() {
     // readGPS();
     for (Logger_V1 &logger : Logger) {
-        logger.sendRequest(logger.temp.id, 100);
-        do {
-            packetSize = CAN.parsePacket();
-        } while (packetSize < 0);
-        // while (packetSize) {
-        //     packetSize = CAN.parsePacket();
-        //     onReceive(packetSize);
-
-        // }
-        // logger.temp.print();
+        logger.sendRequest(logger.euler.id, 20);
     }
 }
