@@ -45,6 +45,7 @@ void setup() {
         digitalWrite(LED_PIN, !digitalRead(LED_PIN));
     });
 
+    // init Logger infomations
     for (size_t i = 0; i < sizeof(Logger) / sizeof(Logger[0]); i++) {
         Logger[i].init();
     }
@@ -54,37 +55,16 @@ void setup() {
     // CAN.onReceive(onReceive);
     Log.notice("Ready");
     SerialBT.println("Ready");
-    Logger[0].init();
-
-    // Print Logger[0]
-    Logger[0].sensors1[0]->f = 100.0;
-    Serial.printf("%s\n", Logger[0].sensors1[0]->name);
-    Serial.printf("%f\n", Logger[0].sensors1[0]->f);
-    // Logger[0].makeCanIdList();
-    // for (Logger_V1 &logger : Logger) {
-    //     logger.init();
-    //     logger.makeCanIdList();
-    // }
 }
 
 void loop() {
     // readGPS();
-    // Log.noticeln("CAN:");
-    // for (Logger_V1 &logger : Logger) {
-    Logger[0].sendRequest(Logger[0].temp.id, 100);
-    int packetSize = CAN.parsePacket(); //パケットサイズの確認
-    if (packetSize) {
-        onReceive(packetSize);
-        // Logger[0].onReceive(packetSize, 110);
-        Logger[0].temp.print();
+    for (Logger_V1 &logger : Logger) {
+        logger.sendRequest(logger.temp.id, 30);
+        int packetSize = CAN.parsePacket(); //パケットサイズの確認
+        if (packetSize) {
+            onReceive(packetSize);
+            logger.temp.print();
+        }
     }
-
-    // logger.sendRequest(logger.press.id, 30);
-    // logger.sendRequest(logger.acc.id, 30);
-    // logger.sendRequest(logger.mag.id, 30);
-    // logger.sendRequest(logger.gyro.id, 30);
-    // logger.sendRequest(logger.grav.id, 30);
-    // logger.sendRequest(logger.euler.id, 30);
-    // logger.sendRequest(logger.quat.id, 30);
-    // }
 }

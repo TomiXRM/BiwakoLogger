@@ -25,7 +25,24 @@ void Logger_V1::init() {
     appendSensor(&grav);
     appendSensor(&euler);
     appendSensor(&quat);
-    Log.noticeln("Logger_V1 %d initialized", id);
+
+    uint8_t k = 0;
+    for (size_t i = 0; i < s1Qty; i++) {
+        canIdList[k] = sensors1[i]->id;
+        k++;
+    }
+    for (size_t i = 0; i < s3Qty; i++) {
+        canIdList[k] = sensors3[i]->id;
+        k++;
+    }
+    for (size_t i = 0; i < s4Qty; i++) {
+        canIdList[k] = sensors4[i]->id;
+        k++;
+    }
+    // Log.noticeln("Logger_V1 %d initialized", id);
+    for (size_t i = 0; i < k; i++) {
+        Serial.printf("canIdList[%d] = %d\n", i, canIdList[i]);
+    }
 }
 
 void Logger_V1::appendSensor(Sensor1_t *s1) {
