@@ -13,12 +13,12 @@ void onReceive(int packetSize) {
         digit++;
     }
     long packetIdForLogger = num_ * pow(10, digit - 1);
-    Log.notice("packetIdForLogger:%d \n", packetIdForLogger);
+    // Log.notice("packetIdForLogger:%d \n", packetIdForLogger);
     for (size_t i = 0; i < sizeof(Logger) / sizeof(Logger[0]); i++) {
         long loggerId = Logger[i].getId();
-
         if (loggerId == packetIdForLogger) {
-            Log.notice("matchId:%d at %d \n", loggerId, packetId);
+            // Log.notice("matchId:%d at %d \n", loggerId, packetId);
+            // Serial.printf("[%d] = %d\n", i, packetId);
             Logger[i].onReceive(packetSize, packetId);
             break;
         }
@@ -74,8 +74,8 @@ void loop() {
     Logger[0].sendRequest(Logger[0].temp.id, 100);
     int packetSize = CAN.parsePacket(); //パケットサイズの確認
     if (packetSize) {
-        // onReceive(packetSize);
-        Logger[0].onReceive(packetSize, 110);
+        onReceive(packetSize);
+        // Logger[0].onReceive(packetSize, 110);
         Logger[0].temp.print();
     }
 

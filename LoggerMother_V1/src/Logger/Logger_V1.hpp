@@ -14,8 +14,6 @@ class Logger_V1 {
     void appendSensor(Sensor3_t *s3);
     void appendSensor(Sensor4_t *s4);
 
-    void makeCanIdList();
-
     void sendRequest(long id, int interval);
 
     void read(uint8_t packetSize, Sensor1_t &s1);
