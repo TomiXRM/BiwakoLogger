@@ -59,7 +59,7 @@ void Logger_V1::appendSensor(Sensor4_t *s4) {
     s4Qty++;
 }
 void Logger_V1::sendRequest(long id, int interval) {
-    Log.noticeln("sendRequest %d", id);
+    // Log.noticeln("sendRequest %d", id);
     can->beginPacket(id, 4, true);
     can->endPacket();
     requestedCanId = id;
@@ -104,7 +104,7 @@ void Logger_V1::read(uint8_t packetSize, Sensor1_t &s1) {
         s1.u8[2] = buf[2];
         s1.u8[3] = buf[3];
         // ArduinoLog CANNOT PRINT FLOATS
-        Serial.printf(":%f", s1.f);
+        // Serial.printf(":%f", s1.f);
     }
 }
 
@@ -115,7 +115,7 @@ void Logger_V1::onReceive(int packetSize, long receivedCanId) {
 
     isRtr = can->packetRtr();
     // if (isRtr)Log.trace("RTR ");
-    Serial.printf("- packetId:0x%x(%ld) ", receivedCanId, receivedCanId);
+    // Serial.printf("- packetId:0x%x(%ld) ", receivedCanId, receivedCanId);
     // check match canId
     bool match = false;
     for (size_t i = 0; i < s1Qty; i++) {
@@ -128,19 +128,19 @@ void Logger_V1::onReceive(int packetSize, long receivedCanId) {
     }
     for (size_t i = 0; i < s3Qty; i++) {
         if (sensors3[i]->x.id == receivedCanId && receivedCanId == requestedCanId + 1) {
-            Log.trace("%s%s", sensors3[i]->name, sensors3[i]->x.name);
+            // Log.trace("%s%s", sensors3[i]->name, sensors3[i]->x.name);
             read(packetSize, sensors3[i]->x);
             match = true;
             break;
         }
         if (sensors3[i]->y.id == receivedCanId && receivedCanId == requestedCanId + 2) {
-            Log.trace("%s%s", sensors3[i]->name, sensors3[i]->y.name);
+            // Log.trace("%s%s", sensors3[i]->name, sensors3[i]->y.name);
             read(packetSize, sensors3[i]->y);
             match = true;
             break;
         }
         if (sensors3[i]->z.id == receivedCanId && receivedCanId == requestedCanId + 3) {
-            Log.trace("%s%s", sensors3[i]->name, sensors3[i]->z.name);
+            // Log.trace("%s%s", sensors3[i]->name, sensors3[i]->z.name);
             read(packetSize, sensors3[i]->z);
             match = true;
             break;
@@ -173,10 +173,10 @@ void Logger_V1::onReceive(int packetSize, long receivedCanId) {
         }
     }
     if (match == false) {
-        Log.error("-- Doesn't match");
+        // Log.error("-- Doesn't match");
         for (long &id : canIdList) {
             if (id == receivedCanId) {
-                Serial.printf(", but it's in the list as [%s]", getSensorNameFromId(id));
+                // Serial.printf(", but it's in the list as [%s]", getSensorNameFromId(id));
                 break;
             }
         }

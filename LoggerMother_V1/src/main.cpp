@@ -159,6 +159,16 @@ void setup() {
 void loop() {
     // readGPS();
     for (Logger_V1 &logger : Logger) {
+        logger.sendRequest(logger.temp.id, 20);
+        logger.sendRequest(logger.press.id, 20);
+        logger.sendRequest(logger.grav.id, 20);
         logger.sendRequest(logger.euler.id, 20);
+    }
+
+    for (Logger_V1 &logger : Logger) {
+        logger.temp.print();
+        logger.press.print();
+        logger.grav.print();
+        logger.euler.print();
     }
 }
