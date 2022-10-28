@@ -2,8 +2,9 @@
 #define SETUP
 
 #include <Arduino.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
+// #include <OneWire.h>
+// #include <DallasTemperature.h>
+#include <CAN.h>
 #include <TinyGPS++.h>
 #include <Ticker.h>
 
@@ -12,6 +13,8 @@
 #include "FS.h"
 #include "SD.h"
 #include "SPI.h"
+#include "dataDefs.hpp"
+#include <./Logger/Logger_V1.hpp>
 
 // pin definitions
 #define LED_PIN 2
@@ -27,6 +30,19 @@ Ticker tick;
 BluetoothSerial SerialBT;
 TinyGPSPlus tinyGPS;
 File myfile; // SDカードの状態を格納
+
+Logger_V1 Logger[] = {
+    // Logger_V1(0, LOG_LEVEL_VERBOSE, true),
+    Logger_V1(100, LOG_LEVEL_VERBOSE, true,&CAN),
+    // Logger_V1(200, LOG_LEVEL_VERBOSE, true),
+    // Logger_V1(300, LOG_LEVEL_VERBOSE, true),
+    // Logger_V1(400, LOG_LEVEL_VERBOSE, true),
+    // Logger_V1(500, LOG_LEVEL_VERBOSE, true),
+    // Logger_V1(600, LOG_LEVEL_VERBOSE, true),
+    // Logger_V1(700, LOG_LEVEL_VERBOSE, true),
+    // Logger_V1(800, LOG_LEVEL_VERBOSE, true),
+    // Logger_V1(900, LOG_LEVEL_VERBOSE, true),
+};
 
 // global variables
 volatile struct {
@@ -54,7 +70,7 @@ void writeSD(String fileName, String data) {
 
 void readGPS() {
     while (Serial2.available()) {
-        char buf[256]{NULL};
+        char buf[256] = {NULL};
         Serial.printf("\n\n -Avairable:%d\n\n", Serial2.available());
         Serial2.readBytes(buf, Serial2.available());
         for (size_t i = 0; i < 256; i++) {
@@ -73,6 +89,25 @@ void readGPS() {
     // Serial.printf("%s\r\n", text);
     // SerialBT.printf("%s\r\n", text);
     // writeSD("test", text);
+}
+
+void initSD() {
+    uint8_t v = 0;
+    while (!SD.begin(4) && v < 10) {
+        v++;
+        delay(1000);
+        Log.errorln("SD Card Mount Failed");
+    }
+}
+
+void initCan() {
+    // CAN通信を初期化
+    CAN.setPins(25, 26);      // CAN_RX, CAN_TX
+    if (!CAN.begin(1000E3)) { // 500kbpsで初期化
+        Log.errorln("Starting CAN failed!");
+        while (1)
+            ;
+    }
 }
 
 #endif

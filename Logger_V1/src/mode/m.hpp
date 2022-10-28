@@ -6,14 +6,14 @@
 #include "./setup/dataDefs.hpp"
 #include "./setup/setup.hpp"
 
-Sensor1_t temp(10, "temp", "℃");
-Sensor1_t press(20, "press", "Pa");
-Sensor3_t acc(30, "acc", "m/s^2");
-Sensor3_t mag(40, "mag", "uT");
-Sensor3_t gyro(50, "gyro", "rad/s");
-Sensor3_t grav(60, "grav", "m/s^2");
-Sensor3_t euler(70, "euler", "rad");
-Sensor4_t quat(80, "quat", "");
+Sensor1_t temp(MY_ID + 10, "temp", "℃");
+Sensor1_t press(MY_ID + 20, "press", "Pa");
+Sensor3_t acc(MY_ID + 30, "acc", "m/s^2");
+Sensor3_t mag(MY_ID + 40, "mag", "uT");
+Sensor3_t gyro(MY_ID + 50, "gyro", "rad/s");
+Sensor3_t grav(MY_ID + 60, "grav", "m/s^2");
+Sensor3_t euler(MY_ID + 70, "euler", "deg");
+Sensor4_t quat(MY_ID + 80, "quat", "");
 
 timer ttt;
 

@@ -10,7 +10,7 @@
 #include "time.h"
 
 #define HOSTNAME "ESP32-1"
-#define MY_ID 0x01
+#define MY_ID 100
 
 #include <Arduino.h>
 #include <OneWire.h>
