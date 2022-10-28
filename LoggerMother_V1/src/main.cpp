@@ -76,7 +76,9 @@ void loop() {
     if (packetSize) {
         // onReceive(packetSize);
         Logger[0].onReceive(packetSize, 110);
+        Logger[0].temp.print();
     }
+
     // logger.sendRequest(logger.press.id, 30);
     // logger.sendRequest(logger.acc.id, 30);
     // logger.sendRequest(logger.mag.id, 30);

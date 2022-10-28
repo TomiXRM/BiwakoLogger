@@ -101,12 +101,16 @@ void Logger_V1::read(uint8_t packetSize, Sensor1_t &s1) {
         uint8_t buf[8] = {0};
         Serial.println(can->available());
         while (can->available()) {
-            da_.buf[i] = can->read();
-            Serial.printf("%d ", da_.buf[i]);
+            buf[i] = can->read();
+            // Serial.printf("%d ", buf[i]);
             i++;
         }
-        s1.f = da_.f;
-        Log.traceln("VALUE:%f %f", s1.f, da_.f);
+        s1.u8[0] = buf[0];
+        s1.u8[1] = buf[1];
+        s1.u8[2] = buf[2];
+        s1.u8[3] = buf[3];
+        // ArduinoLog CANNOT PRINT FLOATS
+        // Serial.printf("VALUE:%f", s1.f);
     }
 }
 
