@@ -2,7 +2,7 @@
 #define LOGEGR_V1_HPP
 #include <Arduino.h>
 #include <ArduinoLog.h>
-#include "./dataDefs.hpp"
+#include "dataDefs.hpp"
 #include <CAN.h>
 
 class Logger_V1 {
@@ -15,6 +15,8 @@ class Logger_V1 {
     void appendSensor(Sensor4_t *s4);
 
     void sendRequest(long id, int interval);
+
+    String getSensorNameFromId(long id);
 
     void read(uint8_t packetSize, Sensor1_t &s1);
 

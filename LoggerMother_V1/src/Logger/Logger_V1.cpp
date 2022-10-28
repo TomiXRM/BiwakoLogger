@@ -41,7 +41,7 @@ void Logger_V1::init() {
     }
     // Log.noticeln("Logger_V1 %d initialized", id);
     for (size_t i = 0; i < k; i++) {
-        Serial.printf("canIdList[%d] = %d\n", i, canIdList[i]);
+        Serial.printf("canIdList[%d] = %ld : %s\n", i, canIdList[i], getSensorNameFromId(canIdList[i]));
     }
 }
 
@@ -66,6 +66,25 @@ void Logger_V1::sendRequest(long id, int interval) {
     delay(interval);
 }
 
+String Logger_V1::getSensorNameFromId(long id) {
+    for (size_t i = 0; i < s1Qty; i++) {
+        if (sensors1[i]->id == id) {
+            return sensors1[i]->name;
+        }
+    }
+    for (size_t i = 0; i < s3Qty; i++) {
+        if (sensors3[i]->id == id) {
+            return sensors3[i]->name;
+        }
+    }
+    for (size_t i = 0; i < s4Qty; i++) {
+        if (sensors4[i]->id == id) {
+            return sensors4[i]->name;
+        }
+    }
+    return "unknown";
+}
+
 void Logger_V1::read(uint8_t packetSize, Sensor1_t &s1) {
     if (isRtr) {
         requestBytes = can->packetDlc();
@@ -85,7 +104,7 @@ void Logger_V1::read(uint8_t packetSize, Sensor1_t &s1) {
         s1.u8[2] = buf[2];
         s1.u8[3] = buf[3];
         // ArduinoLog CANNOT PRINT FLOATS
-        // Serial.printf("VALUE:%f", s1.f);
+        // Serial.printf(":%f", s1.f);
     }
 }
 
@@ -96,13 +115,14 @@ void Logger_V1::onReceive(int packetSize, long receivedCanId) {
 
     isRtr = can->packetRtr();
     // if (isRtr)Log.trace("RTR ");
-    // Serial.printf("packet with id 0x%x", receivedCanId);
-    // Log.trace("Id:%d ", receivedCanId);
+    // Serial.printf("- packetId:0x%x(%ld) ", receivedCanId, receivedCanId);
     // check match canId
+    bool match = false;
     for (size_t i = 0; i < s1Qty; i++) {
         if (sensors1[i]->id == receivedCanId && receivedCanId == requestedCanId) {
             // Log.trace("%s", sensors1[i]->name);
             read(packetSize, *sensors1[i]);
+            match = true;
             break;
         }
     }
@@ -110,16 +130,19 @@ void Logger_V1::onReceive(int packetSize, long receivedCanId) {
         if (sensors3[i]->x.id == receivedCanId && receivedCanId == requestedCanId + 1) {
             // Log.trace("%s%s", sensors3[i]->name, sensors3[i]->x.name);
             read(packetSize, sensors3[i]->x);
+            match = true;
             break;
         }
         if (sensors3[i]->y.id == receivedCanId && receivedCanId == requestedCanId + 2) {
             // Log.trace("%s%s", sensors3[i]->name, sensors3[i]->y.name);
             read(packetSize, sensors3[i]->y);
+            match = true;
             break;
         }
         if (sensors3[i]->z.id == receivedCanId && receivedCanId == requestedCanId + 3) {
             // Log.trace("%s%s", sensors3[i]->name, sensors3[i]->z.name);
             read(packetSize, sensors3[i]->z);
+            match = true;
             break;
         }
     }
@@ -127,23 +150,35 @@ void Logger_V1::onReceive(int packetSize, long receivedCanId) {
         if (sensors4[i]->w.id == receivedCanId && receivedCanId == requestedCanId + 1) {
             // Log.trace("%s%s", sensors4[i]->name, sensors4[i]->w.name);
             read(packetSize, sensors4[i]->w);
+            match = true;
             break;
         }
         if (sensors4[i]->x.id == receivedCanId && receivedCanId == requestedCanId + 2) {
             // Log.trace("%s%s", sensors4[i]->name, sensors4[i]->x.name);
             read(packetSize, sensors4[i]->x);
+            match = true;
             break;
         }
         if (sensors4[i]->y.id == receivedCanId && receivedCanId == requestedCanId + 3) {
             // Log.trace("%s%s", sensors4[i]->name, sensors4[i]->y.name);
             read(packetSize, sensors4[i]->y);
+            match = true;
             break;
         }
         if (sensors4[i]->z.id == receivedCanId && receivedCanId == requestedCanId + 4) {
             // Log.trace("%s%s", sensors4[i]->name, sensors4[i]->z.name);
             read(packetSize, sensors4[i]->z);
+            match = true;
             break;
         }
     }
-    // Log.trace("\n");
+    if (match == false) {
+        // Log.error("-- Doesn't match");
+        for (long &id : canIdList) {
+            if (id == receivedCanId) {
+                // Serial.printf(", but it's in the list as [%s]", getSensorNameFromId(id));
+                break;
+            }
+        }
+    }
 }
