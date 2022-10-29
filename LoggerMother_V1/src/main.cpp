@@ -62,20 +62,21 @@ void initLed() {
 /*************************************** GNSS ***************************************/
 void readGPS() {
     while (Serial2.available()) {
-        char buf[256] = {NULL};
-        Serial.printf("\n\n -Avairable:%d\n\n", Serial2.available());
+        char buf[256] = {0};
+        // Serial.printf("\n\n -Avairable:%d\n\n", Serial2.available());
         Serial2.readBytes(buf, Serial2.available());
         for (size_t i = 0; i < 256; i++) {
-            if (buf[i] == NULL) break;
+            if (buf[i] == 0) break;
             tinyGPS.encode(buf[i]);
-            Serial.print(buf[i]);
+            // Serial.print(buf[i]);
         }
     }
     if (tinyGPS.location.isUpdated()) {
         data.gps.latitude = tinyGPS.location.lat();
         data.gps.longitude = tinyGPS.location.lng();
-        Serial.printf("%f,%f\r\n", data.gps.latitude, data.gps.longitude);
+        // Serial.printf("%f,%f\r\n", data.gps.latitude, data.gps.longitude);
     }
+    tinyGPS.satellites.value();
 
     // sprintf(text, "wp,%d,wt,%.2f", data.pressure, data.temp);
     // Serial.printf("%s\r\n", text);
@@ -127,13 +128,10 @@ void onReceive(int packetSize) {
     }
     if (num_ == 0) digit = 1;
     long packetIdForLogger = num_ * pow(10, digit - 1);
-    // Log.notice("packetIdForLogger:%d \n", packetIdForLogger);
-    for (size_t i = 0; i < sizeof(Logger) / sizeof(Logger[0]); i++) {
-        long loggerId = Logger[i].getId();
+    for (Logger_V1 &logger : Logger) {
+        long loggerId = logger.getId();
         if (loggerId == packetIdForLogger) {
-            // Log.notice("matchId:%d at %d \n", loggerId, packetId);
-            // Serial.printf("[%d] = %d\n", i, packetId);
-            Logger[i].onReceive(packetSize, packetId);
+            logger.onReceive(packetSize, packetId);
             break;
         }
     }
@@ -159,13 +157,14 @@ void setup() {
 void loop() {
     // readGPS();
     for (Logger_V1 &logger : Logger) {
-        logger.sendRequest(logger.temp.id, 20);
-        logger.sendRequest(logger.press.id, 20);
-        logger.sendRequest(logger.grav.id, 20);
-        logger.sendRequest(logger.euler.id, 20);
+        logger.sendRequest(logger.temp.id, 15);
+        logger.sendRequest(logger.press.id, 15);
+        logger.sendRequest(logger.grav.id, 15);
+        logger.sendRequest(logger.euler.id, 15);
     }
 
     for (Logger_V1 &logger : Logger) {
+        Serial.println("------------------------------");
         logger.temp.print();
         logger.press.print();
         logger.grav.print();

@@ -32,13 +32,13 @@ class Logger_V1 {
     Sensor3_t euler;
     Sensor4_t quat;
 
+  private:
     Sensor1_t *sensors1[20]; // change manually
     Sensor3_t *sensors3[20]; // change manually
     Sensor4_t *sensors4[20]; // change manually
-  private:
-    int s1Qty = 0;
-    int s3Qty = 0;
-    int s4Qty = 0;
+    uint8_t s1Qty = 0;
+    uint8_t s3Qty = 0;
+    uint8_t s4Qty = 0;
 
     bool isExtended;
     bool isRemote;
@@ -52,12 +52,5 @@ class Logger_V1 {
 
     long id;
     ESP32SJA1000Class *can;
-
-    typedef union {
-        float f;
-        uint8_t buf[4];
-    } da;
-
-    da da_;
 };
 #endif

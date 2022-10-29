@@ -64,6 +64,13 @@ void Logger_V1::sendRequest(long id, int interval) {
     can->endPacket();
     requestedCanId = id;
     delay(interval);
+    // unsigned long time_ms = millis();
+    // while (!can->parsePacket()) {
+    //     if (millis() - time_ms > interval) {
+    //         Serial.printf("- interval:%ld\n", millis() - time_ms);
+    //         break;
+    //     }
+    // }
 }
 
 String Logger_V1::getSensorNameFromId(long id) {

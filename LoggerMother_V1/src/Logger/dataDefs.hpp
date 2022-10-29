@@ -35,7 +35,7 @@ class Sensor1_t {
     }
 
     void print() {
-        Serial.printf("%s:%.2f[%s] \t id:%d\n", this->name, this->f, this->unit, this->id);
+        Serial.printf("%s:%.2f[%s]\tid:%d\n", this->name, this->f, this->unit, this->id);
     }
 
     void printByts() {
@@ -59,9 +59,9 @@ class Sensor3_t {
     Sensor1_t z;
 
     void print() {
-        Serial.printf("%sX:%.2f[%s] \t id:%d\n", this->name, this->x.f, this->x.unit, this->x.id);
-        Serial.printf("%sY:%.2f[%s] \t id:%d\n", this->name, this->y.f, this->y.unit, this->y.id);
-        Serial.printf("%sZ:%.2f[%s] \t id:%d\n", this->name, this->z.f, this->z.unit, this->z.id);
+        Serial.printf("%sX:%.2f[%s]\tid:%d\n", this->name, this->x.f, this->x.unit, this->x.id);
+        Serial.printf("%sY:%.2f[%s]\tid:%d\n", this->name, this->y.f, this->y.unit, this->y.id);
+        Serial.printf("%sZ:%.2f[%s]\tid:%d\n", this->name, this->z.f, this->z.unit, this->z.id);
     }
 };
 
@@ -83,10 +83,10 @@ class Sensor4_t {
     Sensor1_t z;
 
     void print() {
-        Serial.printf("%sW:%.2f[%s] \t id:%d\n", this->name, this->w.f, this->w.unit, this->w.id);
-        Serial.printf("%sX:%.2f[%s] \t id:%d\n", this->name, this->x.f, this->x.unit, this->x.id);
-        Serial.printf("%sY:%.2f[%s] \t id:%d\n", this->name, this->y.f, this->y.unit, this->y.id);
-        Serial.printf("%sZ:%.2f[%s] \t id:%d\n", this->name, this->z.f, this->z.unit, this->z.id);
+        Serial.printf("%sW:%.2f[%s]\tid:%d\n", this->name, this->w.f, this->w.unit, this->w.id);
+        Serial.printf("%sX:%.2f[%s]\tid:%d\n", this->name, this->x.f, this->x.unit, this->x.id);
+        Serial.printf("%sY:%.2f[%s]\tid:%d\n", this->name, this->y.f, this->y.unit, this->y.id);
+        Serial.printf("%sZ:%.2f[%s]\tid:%d\n", this->name, this->z.f, this->z.unit, this->z.id);
     }
 };
 
