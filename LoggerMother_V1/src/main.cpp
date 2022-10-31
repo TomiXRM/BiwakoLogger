@@ -28,7 +28,7 @@ int packetSize = 0;
 Logger_V1 Logger[] = {
     // Logger_V1(0, LOG_LEVEL_VERBOSE, true),
     Logger_V1(100, LOG_LEVEL_VERBOSE, true, &CAN),
-    // Logger_V1(200, LOG_LEVEL_VERBOSE, true),
+    Logger_V1(200, LOG_LEVEL_VERBOSE, true, &CAN),
     // Logger_V1(300, LOG_LEVEL_VERBOSE, true),
     // Logger_V1(400, LOG_LEVEL_VERBOSE, true),
     // Logger_V1(500, LOG_LEVEL_VERBOSE, true),
